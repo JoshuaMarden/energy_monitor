@@ -15,12 +15,10 @@ resource "aws_s3_bucket" "extract" {
   bucket = "c12-energy-tracker"
   force_destroy = true
 }
-
 resource "aws_s3_bucket_notification" "trigger" {
   bucket = aws_s3_bucket.extract.id
   eventbridge = true
 }
-
 resource "aws_cloudwatch_event_rule" "to_tl" {
   name        = "c12-energy_consumption"
   force_destroy = true
@@ -76,12 +74,11 @@ resource "aws_ecs_task_definition" "energy-pipeline" {
     }
   }])
 }
-
 resource "aws_cloudwatch_event_target" "trigger-pipeline" {
   rule = aws_cloudwatch_event_rule.to_tl.name
   arn = "arn:aws:ecs:eu-west-2:129033205317:cluster/c12-ecs-cluster"
   force_destroy = true
-  role_arn  = "arn:aws:iam::129033205317:role/service-role/Amazon_EventBridge_Invoke_ECS_c12-jonathan"
+  role_arn  = "arn:aws:iam::129033205317:role/service-role/Amazon_EventBridge_Invoke_ECS_314452386"
   ecs_target {
     task_definition_arn = aws_ecs_task_definition.energy-pipeline.arn
     launch_type = "FARGATE"
