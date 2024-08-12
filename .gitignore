@@ -4,5 +4,7 @@
 *.tfvars
 *.parquet
 *.venv
+*/.terraform
+.terraform.lock.hcl
 logs/*
 __pychache__/

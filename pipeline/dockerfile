@@ -1,0 +1,5 @@
+FROM python:latest
+
+COPY load.py .
+
+CMD python3 load.py
