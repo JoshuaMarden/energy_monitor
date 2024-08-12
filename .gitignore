@@ -6,3 +6,4 @@
 *.venv
 logs/*
 __pychache__/
+*.egg-info
