@@ -6,7 +6,7 @@ import os
 from io import StringIO
 from constants import Constants as ct
 
-LOGS_DIR = ct.PATH_TO_LOGS
+LOGS_DIR = ct.LOGS
 
 def obscure(secret: str) -> str:
     """
