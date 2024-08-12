@@ -6,6 +6,7 @@
 *.venv
 logs/*
 __pychache__/
+
 # Terraform
 *.tfstate
 *.tfstate.backup
