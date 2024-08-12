@@ -1,0 +1,8 @@
+*.env
+*.log
+*.loc
+*.tfvars
+*.parquet
+*.venv
+logs/*
+__pychache__/
