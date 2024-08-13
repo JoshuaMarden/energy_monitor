@@ -51,6 +51,10 @@ resource "aws_cloudwatch_event_rule" "to_tl" {
       "bucket": {
       "name": [aws_s3_bucket.extract.id]
       },
+      "object": {
+        "key": [{
+        "prefix": "c12-cost"
+      }]}
       
     }
   })
