@@ -18,8 +18,6 @@ SCRIPT_NAME = (os.path.basename(__file__)).split(".")[0]
 LOGGING_LEVEL = logging.DEBUG
 logger = cg.setup_logging(SCRIPT_NAME, LOGGING_LEVEL)
 
-ENDPOINT = ct.PRODUCTION_ENDPOINT
-
 class APIClient:
     """
     Constructs the default parameters for a request, and makes the request
