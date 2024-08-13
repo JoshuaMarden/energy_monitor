@@ -75,20 +75,20 @@ class DataProcessor:
         if not data or "data" not in data:
             self.logger.warning("No data found in response.")
             return None
-        
+
         df = pd.DataFrame(data["data"])
-        
+
         publish_times = pd.to_datetime(df["publishTime"])
         time_period = {
             "publishTimeStart": publish_times.min(),
             "publishTimeEnd": publish_times.max()
         }
-        
+
         return df, time_period
 
 class Main:
     """
-    Links much of the functionality of the helped classes together.
+    Links much of the functionality of the helper classes together.
     """
     def __init__(self, api_client: APIClient, data_processor: DataProcessor, logger: logging.Logger) -> None:
         """
@@ -101,9 +101,8 @@ class Main:
     def execute(self) -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
         """
         Gets data from the API using APIClient class. Utilises DataProcessor
-        class so that is is returned as a pd.DataFrame.
+        class so that data is returned as a pd.DataFrame.
         """
-
         data = self.api_client.fetch_data()
         if data:
             result = self.data_processor.process_data(data)
@@ -111,7 +110,7 @@ class Main:
                 df, time_period = result
                 self.logger.info("DataFrame of Fuel Data:")
                 self.logger.debug(df.to_string())  # Log the DataFrame as a string!
-                self.logger.info("\nTime Period of Data:")
+                self.logger.info("Time Period of Data:")
                 self.logger.info(time_period)
                 return df, time_period
             else:

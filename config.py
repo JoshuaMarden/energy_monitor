@@ -25,12 +25,15 @@ def obscure(secret: str) -> str:
         return secret[:3] + '*' * (length - 6) + secret[-3:]
 
 def setup_logging(log_name: str, logging_level=logging.DEBUG,
-                  logs_dir="logs"):
+                  logs_dir=LOGS_DIR):
     """Setup logging with two logs: one for normal logs, and one for warnings and errors.
     Prints everything to the terminal as well as saving it to files."""
 
     if not os.path.exists(logs_dir):
         os.makedirs(logs_dir)
+        print(f"Log dir created: `{logs_dir}`")
+        if not os.path.exists(logs_dir):
+            raise Exception(f"Failed to create logs directory: {logs_dir}")
 
     logger = logging.getLogger(log_name)
     logger.setLevel(logging_level)
