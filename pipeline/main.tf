@@ -81,6 +81,21 @@ resource "aws_ecs_task_definition" "energy-pipeline" {
       },
       {   name: "ACCESS_KEY"
         value: tostring(var.AWS_SECRET_KEY)
+      },
+      {name: "DB_HOST"
+        value: tostring(var.DB_HOST)
+      },
+      {   name: "DB_PORT"
+        value: tostring(var.DB_PORT)
+      },
+      {name: "DB_PASSWORD"
+        value: tostring(var.DB_PASSWORD)
+      },
+      {   name: "DB_USER"
+        value: tostring(var.DB_USER)
+      },
+      {name: "DB_NAME"
+        value: tostring(var.DB_NAME)
       }
     ]
     logConfiguration: {
@@ -119,11 +134,6 @@ resource "aws_lambda_function" "extract_production" {
   role                               = aws_iam_role.lambda.arn
   environment {
     variables = {
-      DB_HOST     = var.DB_HOST
-      DB_NAME     = var.DB_NAME
-      DB_PASSWORD = var.DB_PASSWORD
-      DB_PORT     = var.DB_PORT
-      DB_USER     = var.DB_USER
       ACCESS_KEY_ID = var.AWS_ACCESS_KEY
       SECRET_ACCESS_KEY = var.AWS_SECRET_KEY
     }
@@ -183,11 +193,6 @@ resource "aws_lambda_function" "extract_carbon" {
   role                               = aws_iam_role.lambda.arn
   environment {
     variables = {
-      DB_HOST     = var.DB_HOST
-      DB_NAME     = var.DB_NAME
-      DB_PASSWORD = var.DB_PASSWORD
-      DB_PORT     = var.DB_PORT
-      DB_USER     = var.DB_USER
       ACCESS_KEY_ID = var.AWS_ACCESS_KEY
       SECRET_ACCESS_KEY = var.AWS_SECRET_KEY
     }
