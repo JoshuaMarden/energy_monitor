@@ -1,6 +1,5 @@
 from typing import Any
 
-
 class Constants:
     """
     Holds constants for use by other modules.
@@ -24,7 +23,7 @@ class Constants:
 
     # Endpoints
     PRODUCTION_ENDPOINT = "https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELINST"
-    DEMAND_ENDPOINT = "https://bmrs.elexon.co.uk/rolling-system-demand"
+    DEMAND_ENDPOINT = "https://data.elexon.co.uk/bmrs/api/v1/generation/outturn"
     COST_ENDPOINT = "https://bmrs.elexon.co.uk/system-prices"
 
     # S3 Data
