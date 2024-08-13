@@ -1,14 +1,22 @@
-*.env
-*.log
-*.loc
-*.tfvars
-*.parquet
+# Local and Private Variables
 *.venv
+*.env
+*.tfvars
+
+# Logs and Logging-Related
+**/tmp/
 logs/*
+*.parquet
+*.feather
+
+# Misc Module Data 
+#(e.g __pychache__ directories)
 __pychache__/
+*.loc
 
 # Terraform
 *.tfstate
 *.tfstate.backup
 */.terraform
 .terraform.lock.hcl
+
