@@ -78,7 +78,7 @@ resource "aws_cloudwatch_event_target" "trigger-pipeline" {
   rule = aws_cloudwatch_event_rule.to_tl.name
   arn = "arn:aws:ecs:eu-west-2:129033205317:cluster/c12-ecs-cluster"
   force_destroy = true
-  role_arn  = "arn:aws:iam::129033205317:role/service-role/Amazon_EventBridge_Invoke_ECS_314452386"
+  role_arn  = "arn:aws:iam::129033205317:role/service-role/c12-energy-extract-production-role-tffxfn74"
   ecs_target {
     task_definition_arn = aws_ecs_task_definition.energy-pipeline.arn
     launch_type = "FARGATE"
@@ -87,6 +87,49 @@ resource "aws_cloudwatch_event_target" "trigger-pipeline" {
       subnets = ["subnet-058f02e41ee6a5439", "subnet-0c459ebb007081668", "subnet-0ff947058bbc1165d"]
       assign_public_ip = true	
                                               
+    }
+  }
+}
+
+resource "aws_lambda_function" "extract_production" {
+  architectures                      = ["x86_64"]
+  function_name                      = "c12-energy-extract-production"
+  image_uri                          = "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c12-energy-extract:latest"
+  package_type                       = "Image"
+  role                               = "arn:aws:iam::129033205317:role/c12-energy-tracker-lambda-role"
+  environment {
+    variables = {
+      DB_HOST     = var.DB_HOST
+      DB_NAME     = var.DB_NAME
+      DB_PASSWORD = var.DB_PASSWORD
+      DB_PORT     = var.DB_PORT
+      DB_USER     = var.DB_USER
+      ACCESS_KEY_ID = var.AWS_ACCESS_KEY
+      SECRET_ACCESS_KEY = var.AWS_SECRET_KEY
+    }
+  }
+  logging_config {
+    log_format            = "Text"
+    log_group             = "/aws/lambda/c12-energy-production"
+  }
+}
+
+resource "aws_scheduler_schedule" "lambda_schedule" {
+  group_name                   = "default"
+  name                         = "c12-energy-extract-production"
+  schedule_expression          = "cron(30 * * * ? *)"
+  schedule_expression_timezone = "UTC"
+  state                        = "ENABLED"
+  flexible_time_window {
+    maximum_window_in_minutes = 15
+    mode                      = "FLEXIBLE"
+  }
+  target {
+    arn      = aws_lambda_function.extract_production.arn
+    role_arn = "arn:aws:iam::129033205317:role/service-role/Amazon_EventBridge_Scheduler_LAMBDA_cd0fa4fefc"
+    retry_policy {
+      maximum_event_age_in_seconds = 86400
+      maximum_retry_attempts       = 185
     }
   }
 }
