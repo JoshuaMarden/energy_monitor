@@ -7,11 +7,12 @@ import pyarrow
 import boto3
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Tuple, Dict, Any
+from typing import Optional, Tuple, Dict, List, Any
 
 import config as cg
 from constants import Constants as ct
 
+# Global constants
 ENDPOINT = ct.PRICE_ENDPOINT
 SAVE_NAME = ct.RAW_PRICE_DATA_NAME
 SAVE_LOCATION = ct.RAW_PRICE_DATA_PATH
@@ -19,12 +20,12 @@ S3_BUCKET = ct.S3_BUCKET
 REFERENCE_DATA = ct.RAW_PRODUCTION_DATA_PATH
 
 load_dotenv('.env')
-AWS_ACCESS_KEY=os.getenv('AWS_ACCESS_KEY')
-AWS_SECRET_KEY=os.getenv('AWS_SECRET_KEY')
-AWS_REGION=os.getenv('AWS_REGION')
+AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
+AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
+AWS_REGION = os.getenv('AWS_REGION')
 
 # Logging
-SCRIPT_NAME = (os.path.basename(__file__)).split(".")[0]
+SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 LOGGING_LEVEL = logging.DEBUG
 logger = cg.setup_logging(SCRIPT_NAME, LOGGING_LEVEL)
 
@@ -34,14 +35,17 @@ class APIClient:
     returning data over a specific range.
     """
 
-    def __init__(self, base_url: str, logger: logging.Logger) -> None:
+    def __init__(self, base_url: str = ENDPOINT, logger: logging.Logger = logger) -> None:
         """
         Initialize class variables.
         """
         self.base_url = base_url
         self.logger = logger
     
-    def get_settlement_periods(self, path_to_reference_data: str) -> Dict[str, list]:
+    def get_settlement_periods(self,
+                               path_to_reference_data: str = REFERENCE_DATA)\
+                                                                             -> Dict\
+                                                                                [str, List[int]]:
         """
         Gets a local file and looks at what dates/settlement periods are in it.
         Those settlement periods can be used to request the price of fuel
@@ -58,7 +62,7 @@ class APIClient:
         """
         return f"{self.base_url}/{date}/{period}?format=json"
 
-    def fetch_data(self, periods: Dict[str, list]) -> list:
+    def fetch_data(self, periods: Dict[str, List[int]]) -> List[Dict[str, Any]]:
         """
         Makes API requests for each date and settlement period.
         """
@@ -66,10 +70,10 @@ class APIClient:
 
         for date, period_list in periods.items():
             for period in period_list:
-                url = self.construct_default_params(date, period)  # Construct the full URL with path parameters
+                url = self.construct_default_params(date, period) 
 
                 try:
-                    response = requests.get(url)  # No need to pass params, since the URL is fully constructed
+                    response = requests.get(url) 
                     response.raise_for_status()  
                     response_list.append(response.json())  
                 except requests.exceptions.RequestException as e:
@@ -83,14 +87,21 @@ class DataProcessor:
     Processes the data that is returned from APIClient, putting it in
     a pandas DataFrame.
     """
-    def __init__(self, save_location: str, logger: logging.Logger) -> None:
+    def __init__(self,
+                 save_location: str = SAVE_LOCATION,
+                 logger: logging.Logger = logger)\
+                                                  -> None:
         """
         Initialize class variables.
         """
         self.logger = logger
         self.save_location = save_location
 
-    def process_data(self, response_list: list) -> Optional[Tuple[pd.DataFrame, int]]:
+    def process_data(self,
+                     response_list: List[Dict[str, Any]])\
+                                                          -> Optional[\
+                                                             Tuple\
+                                                             [pd.DataFrame, int]]:
         """
         Takes a list of responses, merges them into a DataFrame, and returns it.
         """
@@ -103,7 +114,6 @@ class DataProcessor:
             self.logger.warning("No valid data found in response list.")
             return None
 
-        # Concatenate all DataFrames together
         df = pd.concat(df_list, ignore_index=True)
         df_length = len(df)
 
@@ -116,7 +126,11 @@ class DataProcessor:
         dataframe.to_feather(self.save_location)
         self.logger.info(f"Raw data saved to `{self.save_location}`")
 
-    def get_s3_client(self, access_key: str, secret_key: str, region: str) -> Optional[boto3.client]:
+    def get_s3_client(self,
+                      access_key: str = AWS_ACCESS_KEY,
+                      secret_key: str = AWS_SECRET_KEY,
+                      region: str = AWS_REGION)\
+                                                -> Optional[boto3.client]:
         """
         Gets the boto3 client so that s3 bucket can be accessed for data storage.
         """
@@ -141,10 +155,12 @@ class DataProcessor:
 
         return client
 
-    def save_data_to_s3(self, client: boto3.client, 
-                        save_location: str,
-                        s3_file_name: str,
-                        bucket: str) -> None:
+    def save_data_to_s3(self,
+                        client: boto3.client,
+                        save_location: str = SAVE_LOCATION,
+                        s3_file_name: str = SAVE_NAME,
+                        bucket: str = S3_BUCKET)\
+                                                 -> None:
         """
         Save data to the S3 bucket.
         """
@@ -160,31 +176,36 @@ class Main:
     """
     Links much of the functionality of the helper classes together.
     """
-    def __init__(self, api_client: APIClient,
-                 data_processor: DataProcessor,
-                 logger: logging.Logger) -> None:
+    def __init__(self, 
+                 api_client: APIClient, 
+                 data_processor: DataProcessor, 
+                 logger: logging.Logger = logger,
+                 reference_data_path: str = REFERENCE_DATA,
+                 s3_access_key: str = AWS_ACCESS_KEY, 
+                 s3_secret_key: str = AWS_SECRET_KEY, 
+                 s3_region: str = AWS_REGION, 
+                 s3_bucket: str = S3_BUCKET, 
+                 s3_file_name: str = SAVE_NAME) -> None:
         """
         Initialize class variables.
         """
         self.api_client = api_client
         self.data_processor = data_processor
         self.logger = logger
+        self.reference_data_path = reference_data_path
+        self.s3_access_key = s3_access_key
+        self.s3_secret_key = s3_secret_key
+        self.s3_region = s3_region
+        self.s3_bucket = s3_bucket
+        self.s3_file_name = s3_file_name
 
-    def execute(self, 
-                reference_data_path: str,
-                s3_access_key: str, 
-                s3_secret_key: str, 
-                s3_region: str, 
-                s3_bucket: str, 
-                s3_file_name: str) -> Optional[Tuple[pd.DataFrame, int]]:
+    def execute(self) -> Optional[Tuple[pd.DataFrame, int]]:
         """
         Executes the full workflow: fetches data from the API, processes it,
         saves it locally, and uploads it to an S3 bucket.
         """
-        # Step 1: Get settlement periods from reference data
-        periods = self.api_client.get_settlement_periods(reference_data_path)
+        periods = self.api_client.get_settlement_periods(self.reference_data_path)
 
-        # Step 2: Fetch data from the API based on settlement periods
         response_list = self.api_client.fetch_data(periods)
         if response_list:
             
@@ -201,56 +222,47 @@ class Main:
 
                 self.data_processor.save_data_locally(df)
 
-                s3_client = self.data_processor.get_s3_client(s3_access_key, s3_secret_key, s3_region)
+                s3_client = self.data_processor.get_s3_client(self.s3_access_key, self.s3_secret_key, self.s3_region)
 
                 if s3_client:
-                    self.data_processor.save_data_to_s3(s3_client, self.data_processor.save_location, s3_file_name, s3_bucket)
+                    self.data_processor.save_data_to_s3(s3_client, self.data_processor.save_location, self.s3_file_name, self.s3_bucket)
                 return df, number_of_settlement_periods
             else:
                 self.logger.error("Failed to process the data.")
         else:
             self.logger.error("Failed to retrieve data from API.")
         return None
-    
 
-def main():
+
+def main() -> None:
     """
     Runs everything
     """
-    base_url = ENDPOINT
-    save_location = SAVE_LOCATION
-    script_name = SCRIPT_NAME
 
-    s3_access_key = AWS_ACCESS_KEY
-    s3_secret_key = AWS_SECRET_KEY
-    s3_region = AWS_REGION
-    s3_bucket = S3_BUCKET
-    s3_file_name = SAVE_NAME
-    reference_data = REFERENCE_DATA
-
+    # Setup Variables
+    script_name = SCRIPT_NAME 
 
     # Setup logging and performance tracking
     performance_logger = cg.setup_subtle_logging(script_name)
     profiler = cg.start_monitor()
     logger.info("---> Logging initiated.")
 
-    api_client = APIClient(base_url, logger)
-    data_processor = DataProcessor(save_location, logger)
-    main_class = Main(api_client, data_processor, logger)
+    # Instantiate APIClient and DataProcessor with default arguments
+    api_client = APIClient() 
+    data_processor = DataProcessor()  
+
+    # Instantiate Main class with default arguments
+    main_class = Main(api_client, data_processor)
 
     # Run the main execution workflow
-    main_class.execute(reference_data,
-                       s3_access_key,
-                       s3_secret_key,
-                       s3_region,
-                       s3_bucket,
-                       s3_file_name)
+    main_class.execute()
 
-    # Winds down, stores performance log.
+    # Winds down, stores performance log
     logger.info("---> Operation completed. Stopping performance monitor.")
     cg.stop_monitor(script_name, profiler, performance_logger)
     logger.info("---> Data inserted and process completed for %s.", script_name)
 
-if __name__ == "__main__":
 
+
+if __name__ == "__main__":
     main()
