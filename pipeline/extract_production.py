@@ -13,22 +13,21 @@ class APIClient:
         self.base_url = base_url
 
     def construct_default_params(self):
-        # Setting the time range to the last 12 hours
+        
         twelve_hours_ago = datetime.now(timezone.utc) - timedelta(hours=12)
         now = datetime.now(timezone.utc)
 
-        # Returning parameters as a dictionary
         return {
             'start_time': twelve_hours_ago.isoformat(),  # ISO 8601 format, already UTC-aware
             'end_time': now.isoformat(),
         }
 
     def fetch_data(self):
+        
         try:
-            # Fetching data with default parameters
             response = requests.get(self.base_url, params=self.construct_default_params())
-            response.raise_for_status()  # Will raise an exception for HTTP errors
-            return response.json()  # Assuming the API returns JSON data
+            response.raise_for_status()  
+            return response.json()  
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
             return None
@@ -60,8 +59,6 @@ class Main:
             print("Failed to retrieve data from API.")
         
         
-
-# Example usage:
 if __name__ == "__main__":
     base_url = ENDPOINT
     
