@@ -1,0 +1,119 @@
+from constants import Constants as ct
+import config as cg
+import os
+import sys
+import requests
+import pandas as pd
+import logging
+from datetime import datetime, timedelta, timezone
+from typing import Optional, Tuple, Dict, Any
+
+sys.path.insert(0, os.path.abspath
+                (os.path.join(os.path.dirname(__file__), '..')))
+
+
+SCRIPT_NAME = (os.path.basename(__file__)).split(".")[0]
+LOGGING_LEVEL = logging.DEBUG
+
+logger = cg.setup_logging(SCRIPT_NAME, LOGGING_LEVEL)
+
+ENDPOINT = ct.CARBON_ENDPOINT
+
+
+class APIClient:
+    """
+    Constructs the default parameters for a request, and makes the request
+    returning data over a specific range.
+    """
+
+    def __init__(self, base_url: str, logger: logging.Logger) -> None:
+        """
+        Initialise class variables.
+        """
+        self.base_url = base_url
+        self.logger = logger
+
+    def fetch_data(self) -> Optional[Dict[str, Any]]:
+        """
+         makes an API request, returning data as json.
+        """
+        headers = {
+            'Accept': 'application/json'}
+        try:
+            response = requests.get(
+                self.base_url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"An error occurred: {e}")
+            return None
+
+
+class DataProcessor:
+    """
+    Processes the data that is returned from APIClient, putting it in
+    a pandast dataframe
+    """
+
+    def __init__(self, logger: logging.Logger) -> None:
+        """
+        Initialise class variables.
+        """
+        self.logger = logger
+
+    def process_data(self, data: Dict[str, Any]) -> Optional[pd.DataFrame]:
+        """
+        Takes data, places in DataFrame reformats it
+        """
+        if not data or "data" not in data:
+            self.logger.warning("No data found in response.")
+            return None
+
+        df = pd.DataFrame(data["data"])
+
+        df['forecast'] = df['intensity'].apply(lambda x: x['forecast'])
+        df['carbon level'] = df['intensity'].apply(lambda x: x['index'])
+
+        return df[['from', 'to', 'forecast', 'carbon level']]
+
+
+class Main:
+    """
+    Links much of the functionality of the helper classes together.
+    """
+
+    def __init__(self, api_client: APIClient, data_processor: DataProcessor, logger: logging.Logger) -> None:
+        """
+        Initialise class variables.
+        """
+        self.api_client = api_client
+        self.data_processor = data_processor
+        self.logger = logger
+
+    def execute(self) -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
+        """
+        Gets data from the API using APIClient class. Utilises DataProcessor
+        class so that data is returned as a pd.DataFrame.
+        """
+        data = self.api_client.fetch_data()
+        if data:
+            df = self.data_processor.process_data(data)
+            if df is not None:
+                self.logger.info("DataFrame of Carbon Forecast Data:")
+                self.logger.debug(df.to_string())
+                return df
+            else:
+                self.logger.error("Failed to process the data.")
+        else:
+            self.logger.error("Failed to retrieve data from API.")
+        return None
+
+
+if __name__ == "__main__":
+    base_url = ENDPOINT
+
+    api_client = APIClient(base_url, logger)
+    data_processor = DataProcessor(logger)
+    main = Main(api_client, data_processor, logger)
+
+    main.execute()

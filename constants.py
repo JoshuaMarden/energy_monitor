@@ -29,5 +29,7 @@ class Constants:
     # S3 Data
     S3_BUCKET = "c12-energy-tracker"
 
+    CARBON_ENDPOINT = "https://api.carbonintensity.org.uk/intensity/date"
+
     def __setattr__(self, name: str, value: Any) -> None:
         raise AttributeError(f"Can't Reassign Constant {name}")
