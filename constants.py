@@ -12,19 +12,19 @@ class Constants:
     # Names for data
     RAW_PRODUCTION_DATA_NAME = "raw_production_data.feather"
     RAW_DEMAND_DATA_NAME = "raw_demand_data.feather"
-    RAW_COST_DATA_NAME = "raw_cost_data.feather"
+    RAW_PRICE_DATA_NAME = "raw_cost_data.feather"
     RAW_CARBON_DATA_NAME = "raw_carbon_data.feather"
 
     # Paths to local storage for data
     RAW_PRODUCTION_DATA_PATH = DATA + "/" + RAW_PRODUCTION_DATA_NAME
     RAW_DEMAND_DATA_PATH = DATA + "/" + RAW_DEMAND_DATA_NAME
-    RAW_COST_DATA_PATH = DATA + "/" + RAW_COST_DATA_NAME
+    RAW_PRICE_DATA_PATH = DATA + "/" + RAW_PRICE_DATA_NAME
     RAW_CARBON_DATA_PATH = DATA + "/" + RAW_CARBON_DATA_NAME
 
     # Endpoints
     PRODUCTION_ENDPOINT = "https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELINST"
     DEMAND_ENDPOINT = "https://data.elexon.co.uk/bmrs/api/v1/generation/outturn"
-    COST_ENDPOINT = "https://bmrs.elexon.co.uk/system-prices"
+    PRICE_ENDPOINT = "https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/"
 
     # S3 Data
     S3_BUCKET = "c12-energy-tracker"
