@@ -1,13 +1,11 @@
-import os
-import sys
-import requests
-import pandas as pd
 import logging
-import pyarrow
+import os
+from typing import Any, Dict, List, Optional, Tuple
+
 import boto3
+import pandas as pd
+import requests
 from dotenv import load_dotenv
-from datetime import datetime, timedelta, timezone
-from typing import Optional, Tuple, Dict, List, Any
 
 import config as cg
 from constants import Constants as ct

@@ -1,4 +1,3 @@
-import sys
 import os
 import logging
 import timeit
@@ -8,7 +7,6 @@ from extract_price import main as extract_price
 from extract_carbon import main as extract_carbon
 
 import config as cg
-from constants import Constants as ct
 
 SCRIPT_NAME = (os.path.basename(__file__)).split(".")[0]
 LOGGING_LEVEL = logging.DEBUG
