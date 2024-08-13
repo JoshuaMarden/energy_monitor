@@ -174,18 +174,18 @@ class Main:
             result = self.data_processor.process_data(data)
             if result is not None:
                 df, time_period = result
-                
+
                 self.logger.debug("DataFrame of Fuel Data:")
                 self.logger.debug(df.to_string())  # Log the entire DataFrame as a string
                 self.logger.info("Head of the DataFrame:")
                 self.logger.info("\n" + df.head().to_string())
                 self.logger.info("Time Period of Data:")
                 self.logger.info(time_period)
-                
+
                 self.data_processor.save_data_locally(df)
-                
+
                 s3_client = self.data_processor.get_s3_client(s3_access_key, s3_secret_key, s3_region)
-                
+
                 if s3_client:
                     self.data_processor.save_data_to_s3(s3_client, self.data_processor.save_location, s3_file_name, s3_bucket)
                 return df, time_period
@@ -194,7 +194,7 @@ class Main:
         else:
             self.logger.error("Failed to retrieve data from API.")
         return None
-    
+
 def main():
     """
     Runs everything
@@ -212,10 +212,10 @@ def main():
     performance_logger = cg.setup_subtle_logging(SCRIPT_NAME)
     profiler = cg.start_monitor()
     logger.info("---> Logging initiated.")
-    
+
     api_client = APIClient(base_url, logger)
     data_processor = DataProcessor(save_location, logger)
-    main = Main(api_client, data_processor, logger)
+    main_class = Main(api_client, data_processor, logger)
 
 
     # Winds down, stores performance log.
@@ -223,9 +223,9 @@ def main():
     cg.stop_monitor(SCRIPT_NAME, profiler, performance_logger)
     logger.info("---> Data inserted and process completed for %s.", SCRIPT_NAME)
 
-    main.execute(s3_access_key, s3_secret_key, s3_region, s3_bucket, s3_file_name)
+    main_class.execute(s3_access_key, s3_secret_key, s3_region, s3_bucket, s3_file_name)
 
-        
+
 if __name__ == "__main__":
-    
+
     main()
