@@ -124,6 +124,8 @@ class Main:
                 df, time_period = result
                 self.logger.info("DataFrame of Fuel Data:")
                 self.logger.debug(df.to_string())  # Log the DataFrame as a string!
+                self.logger.info("Head of the DataFrame:")
+                self.logger.debug("\n" + df.head().to_string())
                 self.logger.info("Time Period of Data:")
                 self.logger.info(time_period)
                 self.data_processor.save_data(df)
