@@ -210,7 +210,7 @@ def main() -> None:
     """
     Runs everything
     """
-
+    
     # Setup Variables
     script_name = SCRIPT_NAME 
 
