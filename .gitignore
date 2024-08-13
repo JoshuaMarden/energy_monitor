@@ -13,3 +13,9 @@ logs/*
 #(e.g __pychache__ directories)
 __pychache__/
 *.loc
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+*/.terraform
+.terraform.lock.hcl
