@@ -22,10 +22,10 @@ class APIClient:
     Constructs the default parameters for a request, and makes the request
     returning data over a specific range.
     """
-   
+
     def __init__(self, base_url: str, logger: logging.Logger) -> None:
         """
-        Initialize class variables.
+        Initialise class variables.
         """
         self.base_url = base_url
         self.logger = logger
@@ -56,10 +56,22 @@ class APIClient:
             return None
 
 class DataProcessor:
+    """
+    Processes the data that is returned from APIClient, putting it in
+    a pandast dataframe
+    """
     def __init__(self, logger: logging.Logger) -> None:
+        """
+        Initialise class variables.
+        """
         self.logger = logger
 
     def process_data(self, data: Dict[str, Any]) -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
+        """
+        Takes data, returns it as a tuple. The first element is the data in
+        a pd.DataFrame, the second element is a dictionary containing the
+        time window over which the data was fetched. 
+        """
         if not data or "data" not in data:
             self.logger.warning("No data found in response.")
             return None
@@ -75,19 +87,30 @@ class DataProcessor:
         return df, time_period
 
 class Main:
+    """
+    Links much of the functionality of the helped classes together.
+    """
     def __init__(self, api_client: APIClient, data_processor: DataProcessor, logger: logging.Logger) -> None:
+        """
+        Initialise class variables.
+        """
         self.api_client = api_client
         self.data_processor = data_processor
         self.logger = logger
 
     def execute(self) -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
+        """
+        Gets data from the API using APIClient class. Utilises DataProcessor
+        class so that is is returned as a pd.DataFrame.
+        """
+
         data = self.api_client.fetch_data()
         if data:
             result = self.data_processor.process_data(data)
             if result is not None:
                 df, time_period = result
                 self.logger.info("DataFrame of Fuel Data:")
-                self.logger.debug(df.to_string())  # Log the DataFrame as a string
+                self.logger.debug(df.to_string())  # Log the DataFrame as a string!
                 self.logger.info("\nTime Period of Data:")
                 self.logger.info(time_period)
                 return df, time_period
