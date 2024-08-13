@@ -3,16 +3,19 @@ import sys
 import requests
 import pandas as pd
 import logging
+import pyarrow
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple, Dict, Any
 
 import config as cg
 from constants import Constants as ct
 
-# Set up logging
+ENDPOINT = ct.PRODUCTION_ENDPOINT
+SAVE_LOCATION = ct.RAW_PRODUCTION_DATA
+
+# Logging
 SCRIPT_NAME = (os.path.basename(__file__)).split(".")[0]
 LOGGING_LEVEL = logging.DEBUG
-
 logger = cg.setup_logging(SCRIPT_NAME, LOGGING_LEVEL)
 
 ENDPOINT = ct.PRODUCTION_ENDPOINT
@@ -58,19 +61,20 @@ class APIClient:
 class DataProcessor:
     """
     Processes the data that is returned from APIClient, putting it in
-    a pandast dataframe
+    a pandas DataFrame.
     """
-    def __init__(self, logger: logging.Logger) -> None:
+    def __init__(self, save_location: str, logger: logging.Logger) -> None:
         """
-        Initialise class variables.
+        Initialize class variables.
         """
         self.logger = logger
+        self.save_location = save_location
 
     def process_data(self, data: Dict[str, Any]) -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
         """
         Takes data, returns it as a tuple. The first element is the data in
         a pd.DataFrame, the second element is a dictionary containing the
-        time window over which the data was fetched. 
+        time window over which the data was fetched.
         """
         if not data or "data" not in data:
             self.logger.warning("No data found in response.")
@@ -86,13 +90,23 @@ class DataProcessor:
 
         return df, time_period
 
+    def save_data(self, dataframe: pd.DataFrame) -> None:
+        """
+        Saves the DataFrame to the specified save location in Feather format.
+        """
+        dataframe.to_feather(self.save_location)
+        self.logger.info(f"Raw data saved to `{self.save_location}`")
+
+
 class Main:
     """
     Links much of the functionality of the helper classes together.
     """
-    def __init__(self, api_client: APIClient, data_processor: DataProcessor, logger: logging.Logger) -> None:
+    def __init__(self, api_client: APIClient,
+                 data_processor: DataProcessor,
+                 logger: logging.Logger) -> None:
         """
-        Initialise class variables.
+        Initialize class variables.
         """
         self.api_client = api_client
         self.data_processor = data_processor
@@ -100,7 +114,7 @@ class Main:
 
     def execute(self) -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
         """
-        Gets data from the API using APIClient class. Utilises DataProcessor
+        Gets data from the API using APIClient class. Utilizes DataProcessor
         class so that data is returned as a pd.DataFrame.
         """
         data = self.api_client.fetch_data()
@@ -112,6 +126,7 @@ class Main:
                 self.logger.debug(df.to_string())  # Log the DataFrame as a string!
                 self.logger.info("Time Period of Data:")
                 self.logger.info(time_period)
+                self.data_processor.save_data(df)
                 return df, time_period
             else:
                 self.logger.error("Failed to process the data.")
@@ -121,9 +136,10 @@ class Main:
         
 if __name__ == "__main__":
     base_url = ENDPOINT
+    save_location = SAVE_LOCATION
     
     api_client = APIClient(base_url, logger)
-    data_processor = DataProcessor(logger)
+    data_processor = DataProcessor(save_location, logger)
     main = Main(api_client, data_processor, logger)
 
     main.execute()
