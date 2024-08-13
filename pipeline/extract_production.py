@@ -122,10 +122,10 @@ class Main:
             result = self.data_processor.process_data(data)
             if result is not None:
                 df, time_period = result
-                self.logger.info("DataFrame of Fuel Data:")
+                self.logger.debug("DataFrame of Fuel Data:")
                 self.logger.debug(df.to_string())  # Log the DataFrame as a string!
                 self.logger.info("Head of the DataFrame:")
-                self.logger.debug("\n" + df.head().to_string())
+                self.logger.info("\n" + df.head().to_string())
                 self.logger.info("Time Period of Data:")
                 self.logger.info(time_period)
                 self.data_processor.save_data(df)
@@ -139,9 +139,19 @@ class Main:
 if __name__ == "__main__":
     base_url = ENDPOINT
     save_location = SAVE_LOCATION
+
+    # Setup logging and performance tracking
+    performance_logger = cg.setup_subtle_logging(SCRIPT_NAME)
+    profiler = cg.start_monitor()
+    logger.info("---> Logging initiated.")
     
     api_client = APIClient(base_url, logger)
     data_processor = DataProcessor(save_location, logger)
     main = Main(api_client, data_processor, logger)
+
+    # Winds down, stores performance log.
+    logger.info("---> Operation completed. Stopping performance monitor.")
+    cg.stop_monitor(SCRIPT_NAME, profiler, performance_logger)
+    logger.info("---> Data inserted and process completed for %s.", SCRIPT_NAME)
 
     main.execute()
