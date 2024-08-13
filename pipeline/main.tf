@@ -51,10 +51,6 @@ resource "aws_cloudwatch_event_rule" "to_tl" {
       "bucket": {
       "name": [aws_s3_bucket.extract.id]
       },
-      "object": {
-        "key": [{
-        "prefix": "c12-cost"
-      }]}
       
     }
   })
@@ -102,7 +98,7 @@ resource "aws_cloudwatch_event_target" "trigger-pipeline" {
   rule = aws_cloudwatch_event_rule.to_tl.name
   arn = "arn:aws:ecs:eu-west-2:129033205317:cluster/c12-ecs-cluster"
   force_destroy = true
-  role_arn  = "arn:aws:iam::129033205317:role/service-role/c12-energy-extract-production-role-tffxfn74"
+  role_arn  = "arn:aws:iam::129033205317:role/service-role/Amazon_EventBridge_Invoke_ECS_314452386"
   ecs_target {
     task_definition_arn = aws_ecs_task_definition.energy-pipeline.arn
     launch_type = "FARGATE"
