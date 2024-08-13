@@ -4,3 +4,4 @@ logging
 pyarrow
 snakeviz
 pylint
+boto3
