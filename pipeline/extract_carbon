@@ -12,7 +12,6 @@ sys.path.insert(0, os.path.abspath
                 (os.path.join(os.path.dirname(__file__), '..')))
 
 
-# Set up logging
 SCRIPT_NAME = (os.path.basename(__file__)).split(".")[0]
 LOGGING_LEVEL = logging.DEBUG
 
@@ -36,7 +35,7 @@ class APIClient:
 
     def fetch_data(self) -> Optional[Dict[str, Any]]:
         """
-        Uses the above-created time range to make an API request, returning data.
+         makes an API request, returning data as json.
         """
         headers = {
             'Accept': 'application/json'}
@@ -98,11 +97,9 @@ class Main:
         """
         data = self.api_client.fetch_data()
         if data:
-            result = self.data_processor.process_data(data)
-            if result is not None:
-                df, time_period = result
+            df = self.data_processor.process_data(data)
+            if df is not None:
                 self.logger.info("DataFrame of Carbon Forecast Data:")
-                # Log the DataFrame as a string!
                 self.logger.debug(df.to_string())
                 return df
             else:
@@ -119,4 +116,4 @@ if __name__ == "__main__":
     data_processor = DataProcessor(logger)
     main = Main(api_client, data_processor, logger)
 
-    print(main.execute())
+    main.execute()
