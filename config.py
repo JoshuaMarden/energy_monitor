@@ -89,25 +89,25 @@ def start_monitor() -> cProfile.Profile:
 
 def stop_monitor(script_name: str, profiler: cProfile.Profile, logger,
                  logs_dir=LOGS_DIR) -> None:
-    """Terminates performance tracking, saves both a .prof files and a
-    human readable text file."""
+    """Terminates performance tracking, saves both a .prof file and a
+    human-readable text file."""
     profiler.disable()
 
     binary_profile = f"{logs_dir}/{script_name}_performance.prof"
-
     profiler.dump_stats(binary_profile)
 
     s = StringIO()
     ps = pstats.Stats(profiler, stream=s).sort_stats('cumulative')
-    ps.print_stats()
+    ps.print_stats() 
 
     human_readable_stats = s.getvalue()
+
+    first_line = human_readable_stats.splitlines()[0]
+    print(first_line)  # Print only the first line to the terminal
+
     text_profile = os.path.join(logs_dir, f"{script_name}_performance.txt")
     with open(text_profile, 'w') as f:
         f.write(human_readable_stats)
- 
-    logger.info(s.getvalue())
-
 
 def get_settlement_period(current_time=None, previous_period=False):
     """
