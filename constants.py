@@ -1,6 +1,5 @@
 from typing import Any
 
-
 class Constants:
     """
     Holds constants for use by other modules.
