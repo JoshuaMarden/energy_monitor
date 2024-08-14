@@ -96,16 +96,14 @@ class Transform:
         return data
 
     def generation_transform(self, df: pd.DataFrame) -> tuple:
-        cutoff = datetime.datetime.now() - datetime.timedelta(hours=1, minutes=5)
         df['publish_date'] = df['publishTime'].apply(lambda x: x.split('T')[0])
         df['gain_loss'] = df['generation'].apply(
             lambda x: '+' if x > 0 else '-')
 
-        cutoff = df['publishTime'].unique()[0]
-        df = df.query('publishTime != @cutoff')
+        # cutoff = datetime.datetime.now() - datetime.timedelta(hours=1, minutes=5)
+        # df = df.query('publishTime != @cutoff')
         df = df[['publishTime', 'publish_date', 'fuelType', 'gain_loss',
                 'generation', 'settlementPeriod']]
-        print(df.head(20))
         return list(df.itertuples(index=False, name=None))
 
     def demand_transform(self, df: pd.DataFrame) -> tuple:
@@ -115,7 +113,6 @@ class Transform:
     def cost_transform(self, df: pd.DataFrame) -> tuple:
         df = df[['settlementDate', 'settlementPeriod',
                  'systemSellPrice', 'systemBuyPrice']]
-        print(df)
         return list(df.itertuples(index=False, name=None))
 
     def carbon_transform(self, df: pd.DataFrame) -> tuple:
