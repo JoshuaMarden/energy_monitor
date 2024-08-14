@@ -12,4 +12,5 @@ logs/*
 # Misc Module Data 
 #(e.g __pychache__ directories)
 __pychache__/
+**/__pycache__
 *.loc
