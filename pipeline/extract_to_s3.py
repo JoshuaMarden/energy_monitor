@@ -8,10 +8,15 @@ from extract_carbon import main as extract_carbon
 
 import config as cg
 
+save_directory = 'tmp/data'
+if not os.path.exists(save_directory):
+    os.makedirs(save_directory)
+
 SCRIPT_NAME = (os.path.basename(__file__)).split(".")[0]
 LOGGING_LEVEL = logging.DEBUG
 
 logger = cg.setup_logging(SCRIPT_NAME, LOGGING_LEVEL)
+
 
 def pipeline():
     logger.info("|===============")
@@ -47,9 +52,11 @@ def pipeline():
     logger.info("==> Extract Scripts Complete!")
     logger.info("=======================================|")
 
+
 def main():
     pipeline_time = timeit.timeit(pipeline, number=1)
     logger.info("Pipeline completed in %s seconds", pipeline_time)
+
 
 if __name__ == "__main__":
     main()
