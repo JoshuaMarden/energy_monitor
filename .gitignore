@@ -4,8 +4,8 @@
 *.tfvars
 
 # Logs and Logging-Related
-**/tmp/
 logs/*
+data/*
 *.parquet
 *.feather
 
@@ -14,3 +14,9 @@ logs/*
 __pychache__/
 **/__pycache__
 *.loc
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+*/.terraform
+.terraform.lock.hcl
