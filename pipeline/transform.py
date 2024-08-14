@@ -1,3 +1,7 @@
+"""
+Connects to an S3 bucket, downloads, transforms and loads the data into a
+database 
+"""
 import os
 import logging
 import glob
@@ -66,8 +70,12 @@ class Transform:
         self.logger = logger
 
     def get_data(self) -> dict[tuple]:
+        """
+        Turns downloaded files into an pandas dataframe, then Transforms the 
+        dataframe into a list of tuples
+        """
         files = [file for file in glob.glob(
-            f"*.feather*") if os.path.isfile(file)]
+            "*.feather*") if os.path.isfile(file)]
         data = {}
         for file in files:
             df = pd.read_feather(file)
@@ -75,24 +83,28 @@ class Transform:
                 formatted_data = self.generation_transform(df)
                 data['generation'] = formatted_data
                 self.logger.info(
-                    f"""Successfully transformed generation data""")
+                    """Successfully transformed generation data""")
             if "demand" in file:
                 formatted_data = self.demand_transform(df)
                 data['demand'] = formatted_data
-                self.logger.info(f"""Successfully transformed demand data""")
+                self.logger.info("""Successfully transformed demand data""")
             if "cost" in file:
                 formatted_data = self.cost_transform(df)
                 data['cost'] = formatted_data
-                self.logger.info(f"""Successfully transformed cost data""")
+                self.logger.info("""Successfully transformed cost data""")
             if "carbon" in file:
                 formatted_data = self.carbon_transform(df)
                 data['carbon'] = formatted_data
-                self.logger.info(f"""Successfully transformed carbon data""")
+                self.logger.info("""Successfully transformed carbon data""")
 
         self.delete_read_files(files)
         return data
 
     def generation_transform(self, df: pd.DataFrame) -> tuple:
+        """
+        Filters and transforms the generation dataframe passed into it and returns
+        a list of tuples
+        """
         df['publish_date'] = df['publishTime'].apply(lambda x: x.split('T')[0])
         df['gain_loss'] = df['generation'].apply(
             lambda x: '+' if x > 0 else '-')
@@ -102,21 +114,36 @@ class Transform:
         return list(df.itertuples(index=False, name=None))
 
     def demand_transform(self, df: pd.DataFrame) -> tuple:
+        """
+        Filters and transforms the demand dataframe passed into it and returns
+        a list of tuples
+        """
         df = df[['startTime', 'demand']]
         return list(df.itertuples(index=False, name=None))
 
     def cost_transform(self, df: pd.DataFrame) -> tuple:
+        """
+        Filters and transforms the cost dataframe passed into it and returns
+        a list of tuples
+        """
         df = df[['settlementDate', 'settlementPeriod',
                  'systemSellPrice', 'systemBuyPrice']]
         return list(df.itertuples(index=False, name=None))
 
     def carbon_transform(self, df: pd.DataFrame) -> tuple:
+        """
+        Filters and transforms the carbon dataframe passed into it and returns
+        a list of tuples
+        """
         new_df = pd.concat(
             df.apply(self.split_intervals, axis=1).to_list(), ignore_index=True)
         df = new_df[['from', 'forecast', 'carbon level']]
         return list(df.itertuples(index=False, name=None))
 
     def split_intervals(self, row):
+        """
+        Turns 30 minute periods into 6 5 minute periods
+        """
         intervals = pd.date_range(
             start=row['from'], end=row['to'], freq='5min')
         return pd.DataFrame({
@@ -127,11 +154,18 @@ class Transform:
         })
 
     def delete_read_files(self, files):
+        """
+        Removes downloaded files 
+        """
         for file in files:
             os.remove(file)
 
 
 class DatabaseConnection:
+    """
+    gets database connection
+    """
+
     def get_connection(self) -> connection:
         """Returns a connection to the database movies"""
         connecting = connect(
@@ -145,7 +179,14 @@ class DatabaseConnection:
 
 
 class Load:
+    """
+    Loads data into a database
+    """
+
     def load_values(self, conn, data):
+        """
+        Loads the data into an RDS database
+        """
         curr = conn.cursor(cursor_factory=RealDictCursor)
         if data['demand']:
             sql_query = """INSERT INTO Demand (publish_time, Demand_amt)
@@ -163,8 +204,8 @@ class Load:
                         ON CONFLICT DO NOTHING"""
             execute_values(curr, sql_query, data['carbon'])
         if data['generation']:
-            sql_query = """INSERT INTO Generation (publish_time, publish_date, 
-                        fuel_type, gain_loss, generated, settlement_period)
+            sql_query = """INSERT INTO Generation (publish_time, publish_date,
+                         fuel_type, gain_loss, generated, settlement_period)
                         VALUES %s
                         ON CONFLICT DO NOTHING"""
             execute_values(curr, sql_query, data['generation'])
