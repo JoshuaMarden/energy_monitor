@@ -10,7 +10,7 @@ class Constants:
     LOGS = "tmp/logs/"
 
     # Names for data
-    RAW_GENERATION_DATA_NAME = "raw_production_data.feather"
+    RAW_GENERATION_DATA_NAME = "raw_generation_data.feather"
     RAW_DEMAND_DATA_NAME = "raw_demand_data.feather"
     RAW_PRICE_DATA_NAME = "raw_cost_data.feather"
     RAW_CARBON_DATA_NAME = "raw_carbon_data.feather"
