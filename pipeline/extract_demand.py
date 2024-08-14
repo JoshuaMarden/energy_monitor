@@ -79,7 +79,7 @@ class CustomDataProcessor(DataProcessor):
                  region: str = AWS_REGION, 
                  s3_file_name: str = SAVE_NAME, 
                  bucket: str = S3_BUCKET, 
-                 logger: Optional[logging.Logger] = None) -> None:
+                 logger: logging.Logger = logger) -> None:
         """
         Initialize the CustomDataProcessor with the parent class constructor.
         """
