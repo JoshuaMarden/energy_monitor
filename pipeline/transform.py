@@ -9,7 +9,6 @@ import boto3
 import requests
 import pandas as pd
 
-
 import config as cg
 from constants import Constants as ct
 
@@ -63,45 +62,65 @@ class Transform:
         """
         Initialize class variables.
         """
-        ...
+        self.logger = logger
 
-    def get_dfs(self):
+    def get_data(self) -> dict[tuple]:
         files = [file for file in glob.glob(
             f"*.feather*") if os.path.isfile(file)]
-
+        data = {}
         for file in files:
             df = pd.read_feather(file)
             if "production" in file:
-                self.production_transform(df)
+                formatted_data = self.production_transform(df)
+                data['production'] = formatted_data
+                self.logger.info(f"""Successfully transformed
+                                 production data""")
             if "demand" in file:
-                self.demand_transform(df)
+                formatted_data = self.demand_transform(df)
+                data['demand'] = formatted_data
+                self.logger.info(f"""Successfully transformed
+                                 demand data""")
             if "cost" in file:
-                self.cost_transform(df)
+                formatted_data = self.cost_transform(df)
+                data['cost'] = formatted_data
+                self.logger.info(f"""Successfully transformed
+                                 cost data""")
+            if "carbon" in file:
+                formatted_data = self.carbon_transform(df)
+                data['carbon'] = formatted_data
+                self.logger.info(f"""Successfully transformed
+                                 carbon data""")
 
-    def production_transform(self, df: pd.DataFrame):
+        return data
+
+    def production_transform(self, df: pd.DataFrame) -> tuple:
 
         df['gain_loss'] = df['generation'].apply(
             lambda x: '+' if x > 0 else '-')
         df = df[['publishTime', 'fuelType', 'gain_loss',
                 'generation', 'settlementPeriod']]
 
-        values = list(df.itertuples(index=False, name=None))
+        return list(df.itertuples(index=False, name=None))
 
-    def demand_transform(self, df: pd.DataFrame):
+    def demand_transform(self, df: pd.DataFrame) -> tuple:
         df = df[['startTime', 'demand']]
-        values = list(df.itertuples(index=False, name=None))
 
-    def cost_transform(self, df: pd.DataFrame):
-        df.to_csv('to.csv')
+        return list(df.itertuples(index=False, name=None))
+
+    def cost_transform(self, df: pd.DataFrame) -> tuple:
         df = df[['settlementDate', 'settlementPeriod',
                  'systemSellPrice', 'systemBuyPrice']]
-        values = list(df.itertuples(index=False, name=None))
+
+        return list(df.itertuples(index=False, name=None))
+
+    def carbon_transform(self, df: pd.DataFrame) -> tuple:
+        print(df)
+
+        return list(df.itertuples(index=False, name=None))
 
 
 if __name__ == "__main__":
     s3_bucket = S3bucket()
     s3_bucket.get_files_from_bucket()
     tf = Transform()
-    tf.get_dfs()
-
-    print("hello")
+    tf.get_data()
