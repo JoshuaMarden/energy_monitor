@@ -7,6 +7,7 @@ import pandas as pd
 import requests
 from dotenv import load_dotenv
 
+from common import DataProcessor
 import config as cg
 from constants import Constants as ct
 
@@ -55,85 +56,50 @@ class APIClient:
             self.logger.error(f"An error occurred: {e}")
             return None
 
-class DataProcessor:
-    """
-    Processes the data that is returned from APIClient, putting it in
-    a pandas DataFrame.
-    """
 
-    def __init__(self,
-                 save_location: str = SAVE_LOCATION,
-                 logger: logging.Logger = logger)\
-                                                  -> None:
+class CustomDataProcessor(DataProcessor):
+    """
+    Custom DataProcessor that implements a specific process_data method.
+    """
+    
+    def __init__(self, save_location: str = SAVE_LOCATION, 
+                 aws_access_key: str = AWS_ACCESS_KEY, 
+                 aws_secret_key: str = AWS_SECRET_KEY, 
+                 region: str = AWS_REGION, 
+                 s3_file_name: str = SAVE_NAME, 
+                 bucket: str = S3_BUCKET, 
+                 logger: logging.Logger = logger) -> None:
         """
-        Initialize class variables.
+        Initialize the CustomDataProcessor with the parent class constructor.
         """
-        self.logger = logger
-        self.save_location = save_location
+        # Call the parent class's __init__ method
+        super().__init__(save_location, 
+                         aws_access_key, 
+                         aws_secret_key, 
+                         region, 
+                         s3_file_name, 
+                         bucket, 
+                         logger)
 
-    def process_data(self, data: Dict[str, Any]) -> Optional[pd.DataFrame]:
+    def process_data(self, data: Dict[str, Any],
+                     logger: logging.Logger = logger) -> Optional[pd.DataFrame]:
         """
-        Takes data, places in DataFrame, and reformats it.
+        Takes data, places it in DataFrame, and reformats it.
         """
+        logger = logger or logging.getLogger(__name__)
+        
         if not data or "data" not in data:
-            self.logger.warning("No data found in response.")
+            logger.warning("No data found in response.")
             return None
 
         df = pd.DataFrame(data["data"])
 
+        # Custom processing logic
         df['forecast'] = df['intensity'].apply(lambda x: x['forecast'])
         df['carbon level'] = df['intensity'].apply(lambda x: x['index'])
 
         return df[['from', 'to', 'forecast', 'carbon level']]
 
-    def save_data_locally(self, dataframe: pd.DataFrame) -> None:
-        """
-        Saves the DataFrame to the specified save location in Feather format.
-        """
-        dataframe.to_feather(self.save_location)
-        self.logger.info(f"Raw data saved to `{self.save_location}`")
-
-    def get_s3_client(self,
-                      access_key: str = AWS_ACCESS_KEY,
-                      secret_key: str = AWS_SECRET_KEY,
-                      region: str = AWS_REGION) -> Optional[boto3.client]:
-        """
-        Gets the boto3 client so that s3 bucket can be accessed for data storage.
-        """
-        self.logger.info("Fetching boto3 client...")
-        self.logger.info("AWS access key: `%s`", cg.obscure(access_key))
-        self.logger.info("AWS secret key: `%s`", cg.obscure(secret_key))
-
-        try:
-            client = boto3.client(
-                's3',
-                aws_access_key_id=access_key,
-                aws_secret_access_key=secret_key,
-                region_name=region
-            )
-            self.logger.info("Retrieved client successfully.")
-            self.logger.debug(f"Client: {client}")
-
-        except Exception as e:
-            self.logger.error("Failed to get client!")
-            self.logger.error(f"{e}")
-            return None
-
-        return client
-
-    def save_data_to_s3(self, client: boto3.client, 
-                        save_location: str = SAVE_LOCATION,
-                        s3_file_name: str = SAVE_NAME,
-                        bucket: str = S3_BUCKET) -> None:
-        """
-        Save data to the S3 bucket.
-        """
-        try:
-            with open(save_location, 'rb') as file_data:
-                client.put_object(Bucket=bucket, Key=s3_file_name, Body=file_data)
-            self.logger.info(f"Data successfully saved to S3 as `{s3_file_name}`.")
-        except Exception as e:
-            self.logger.error(f"Error saving data to S3: {e}")
 
 class Main:
     """
@@ -141,7 +107,7 @@ class Main:
     """
     def __init__(self,
                  api_client: APIClient,
-                 data_processor: DataProcessor,
+                 data_processor: CustomDataProcessor,
                  s3_access_key: str = AWS_ACCESS_KEY,
                  s3_secret_key: str = AWS_SECRET_KEY,
                  s3_region: str = AWS_REGION,
@@ -185,14 +151,12 @@ class Main:
                 self.logger.info(f"Data saved locally at `{self.data_processor.save_location}`.")
 
                 self.logger.info("Attempting to get S3 client.")
-                s3_client = self.data_processor.get_s3_client(
-                    self.s3_access_key, self.s3_secret_key, self.s3_region)
+                s3_client = self.data_processor.get_s3_client()
 
                 if s3_client:
                     self.logger.info("S3 client retrieved successfully.")
                     self.logger.info("Uploading the data to S3.")
-                    self.data_processor.save_data_to_s3(
-                        s3_client, self.data_processor.save_location, self.s3_file_name, self.s3_bucket)
+                    self.data_processor.save_data_to_s3()
                     self.logger.info(f"Data successfully uploaded to S3 bucket `{self.s3_bucket}` as `{self.s3_file_name}`.")
                 else:
                     self.logger.error("Failed to get S3 client. Data was not uploaded to S3.")
@@ -212,6 +176,7 @@ def main() -> None:
     
     # Setup Variables
     script_name = SCRIPT_NAME 
+    save_location = SAVE_LOCATION
 
     # Setup logging and performance tracking
     performance_logger = cg.setup_subtle_logging(script_name)  
@@ -220,7 +185,7 @@ def main() -> None:
 
     # Instantiate APIClient and DataProcessor using their default values
     api_client = APIClient() 
-    data_processor = DataProcessor()  
+    data_processor = CustomDataProcessor(save_location)  
 
     # Instantiate Main class with default arguments
     main_class = Main(api_client, data_processor)
