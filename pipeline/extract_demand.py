@@ -72,7 +72,7 @@ class CustomDataProcessor(DataProcessor):
     """
     Custom DataProcessor that implements a specific process_data method.
     """
-    
+
     def __init__(self, save_location: str = SAVE_LOCATION, 
                  aws_access_key: str = AWS_ACCESS_KEY, 
                  aws_secret_key: str = AWS_SECRET_KEY, 
@@ -92,7 +92,7 @@ class CustomDataProcessor(DataProcessor):
                          bucket, 
                          logger)
 
-    def process_data(self, data: Dict[str, Any], logger: Optional[logging.Logger] = None) -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
+    def process_data(self, data: Dict[str, Any], logger: logging.Logger = logger) -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
         """
         Takes data, returns it as a tuple. The first element is the data in
         a pd.DataFrame, the second element is a dictionary containing the
