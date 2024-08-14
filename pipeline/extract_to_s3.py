@@ -1,7 +1,7 @@
 import os
 import logging
 import timeit
-from extract_production import main as extract_production
+from pipeline.extract_generation import main as extract_generation
 from extract_demand import main as extract_demand
 from extract_price import main as extract_price
 from extract_carbon import main as extract_carbon
@@ -22,7 +22,7 @@ def pipeline():
     logger.info("===========")
     logger.info("==> Executing extract_production..")
     logger.info("===========")
-    extract_time = timeit.timeit(extract_production, number=1)
+    extract_time = timeit.timeit(extract_generation, number=1)
     logger.info("Extract script completed in %s seconds", extract_time)
 
     logger.info("===========")

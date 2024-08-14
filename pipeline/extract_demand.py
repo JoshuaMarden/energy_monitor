@@ -73,7 +73,9 @@ class DataProcessor:
     Processes the data that is returned from APIClient, putting it in
     a pandas DataFrame.
     """
-    def __init__(self, save_location: str = SAVE_LOCATION, logger: logging.Logger = logger) -> None:
+    def __init__(self,
+                 save_location: str = SAVE_LOCATION,
+                 logger: logging.Logger = logger) -> None:
         """
         Initialize class variables.
         """

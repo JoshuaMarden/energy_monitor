@@ -10,19 +10,19 @@ class Constants:
     LOGS = "tmp/logs/"
 
     # Names for data
-    RAW_PRODUCTION_DATA_NAME = "raw_production_data.feather"
+    RAW_GENERATION_DATA_NAME = "raw_production_data.feather"
     RAW_DEMAND_DATA_NAME = "raw_demand_data.feather"
     RAW_PRICE_DATA_NAME = "raw_cost_data.feather"
     RAW_CARBON_DATA_NAME = "raw_carbon_data.feather"
 
     # Paths to local storage for data
-    RAW_PRODUCTION_DATA_PATH = DATA + RAW_PRODUCTION_DATA_NAME
+    RAW_GENERATION_DATA_PATH = DATA + RAW_GENERATION_DATA_NAME
     RAW_DEMAND_DATA_PATH = DATA + RAW_DEMAND_DATA_NAME
     RAW_PRICE_DATA_PATH = DATA + RAW_PRICE_DATA_NAME
     RAW_CARBON_DATA_PATH = DATA + RAW_CARBON_DATA_NAME
 
     # Endpoints
-    PRODUCTION_ENDPOINT = "https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELINST"
+    GENERATION_ENDPOINT = "https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELINST"
     DEMAND_ENDPOINT = "https://data.elexon.co.uk/bmrs/api/v1/generation/outturn"
     PRICE_ENDPOINT = "https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/"
     CARBON_ENDPOINT = "https://api.carbonintensity.org.uk/intensity/date"
