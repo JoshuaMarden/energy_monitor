@@ -92,7 +92,9 @@ class CustomDataProcessor(DataProcessor):
                          bucket, 
                          logger)
 
-    def process_data(self, data: Dict[str, Any], logger: logging.Logger = logger) -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
+    def process_data(self, data: Dict[str, Any],
+                     logger: logging.Logger = logger)\
+                    -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
         """
         Takes data, returns it as a tuple. The first element is the data in
         a pd.DataFrame, the second element is a dictionary containing the
