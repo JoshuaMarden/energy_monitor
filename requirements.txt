@@ -5,3 +5,4 @@ pyarrow
 snakeviz
 pylint
 boto3
+psycopg2
