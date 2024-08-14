@@ -18,7 +18,7 @@ class DataProcessor:
                  region: str, 
                  s3_file_name: str, 
                  bucket: str, 
-                 logger: Optional[logging.Logger] = None) -> None:
+                 logger: logging.Logger) -> None:
         """
         Initialize class variables.
 
@@ -31,7 +31,7 @@ class DataProcessor:
         self.region = region
         self.s3_file_name = s3_file_name
         self.bucket = bucket
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logger
         self.s3_client = None
 
     def save_data_locally(self, dataframe: pd.DataFrame) -> None:
