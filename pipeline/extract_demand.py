@@ -127,7 +127,7 @@ class Main:
                  s3_region: str = AWS_REGION,
                  s3_bucket: str = S3_BUCKET,
                  s3_file_name: str = SAVE_NAME,
-                 logger: logging.Logger = logging.getLogger(__name__)) -> None:
+                 logger: logging.Logger = logger) -> None:
         """
         Initialize class variables.
         """
