@@ -29,6 +29,25 @@ resource "aws_iam_role" "lambda" {
   path                  = "/"
 }
 
+# Security group for database
+resource "aws_security_group" "db_sg" {
+  name        = "c12-energy_database"
+  description = "Allow inbound psql traffic"
+  vpc_id      = "vpc-061c17c21b97427d8"
+}
+resource "aws_vpc_security_group_ingress_rule" "ipv4_sl_in" {
+  security_group_id = aws_security_group.db_sg.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 5432
+  ip_protocol       = "tcp"
+  to_port           = 5432
+}
+resource "aws_vpc_security_group_egress_rule" "ipv4_all_out" {
+  security_group_id = aws_security_group.db_sg.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
+
 # S3 bucket
 resource "aws_s3_bucket" "extract" {
   bucket = "c12-energy-tracker"
