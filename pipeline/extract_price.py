@@ -2,11 +2,11 @@ import logging
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
-import boto3
 import pandas as pd
 import requests
 from dotenv import load_dotenv
 
+from common import DataProcessor
 import config as cg
 from constants import Constants as ct
 
@@ -80,36 +80,45 @@ class APIClient:
             
         return response_list
 
-class DataProcessor:
-    """
-    Processes the data that is returned from APIClient, putting it in
-    a pandas DataFrame.
-    """
-    def __init__(self,
-                 save_location: str = SAVE_LOCATION,
-                 logger: logging.Logger = logger)\
-                                                  -> None:
-        """
-        Initialize class variables.
-        """
-        self.logger = logger
-        self.save_location = save_location
 
-    def process_data(self,
-                     response_list: List[Dict[str, Any]])\
-                                                          -> Optional[\
-                                                             Tuple\
-                                                             [pd.DataFrame, int]]:
+class CustomDataProcessor(DataProcessor):
+    """
+    Custom DataProcessor that implements a specific process_data method.
+    """
+    
+    def __init__(self, save_location: str = SAVE_LOCATION, 
+                 aws_access_key: str = AWS_ACCESS_KEY, 
+                 aws_secret_key: str = AWS_SECRET_KEY, 
+                 region: str = AWS_REGION, 
+                 s3_file_name: str = SAVE_NAME, 
+                 bucket: str = S3_BUCKET, 
+                 logger: logging.Logger = logger) -> None:
+        """
+        Initialize the CustomDataProcessor with the parent class constructor.
+        """
+        # Call the parent class's __init__ method
+        super().__init__(save_location, 
+                         aws_access_key, 
+                         aws_secret_key, 
+                         region, 
+                         s3_file_name, 
+                         bucket, 
+                         logger)
+
+    def process_data(self, response_list: List[Dict[str, Any]],
+                     logger: logging.Logger = logger) -> Optional[Tuple[pd.DataFrame, int]]:
         """
         Takes a list of responses, merges them into a DataFrame, and returns it.
         """
+        logger = logger or self.logger
+        
         if not response_list:
-            self.logger.warning("No data found in response.")
+            logger.warning("No data found in response.")
             return None
         
         df_list = [pd.DataFrame(response["data"]) for response in response_list]
         if not df_list:
-            self.logger.warning("No valid data found in response list.")
+            logger.warning("No valid data found in response list.")
             return None
 
         df = pd.concat(df_list, ignore_index=True)
@@ -117,118 +126,75 @@ class DataProcessor:
 
         return df, df_length
 
-    def save_data_locally(self, dataframe: pd.DataFrame) -> None:
-        """
-        Saves the DataFrame to the specified save location in Feather format.
-        """
-        dataframe.to_feather(self.save_location)
-        self.logger.info(f"Raw data saved to `{self.save_location}`")
-
-    def get_s3_client(self,
-                      access_key: str = AWS_ACCESS_KEY,
-                      secret_key: str = AWS_SECRET_KEY,
-                      region: str = AWS_REGION)\
-                                                -> Optional[boto3.client]:
-        """
-        Gets the boto3 client so that s3 bucket can be accessed for data storage.
-        """
-        self.logger.info("Fetching boto3 client...")
-        self.logger.info("AWS access key: `%s`", cg.obscure(access_key))
-        self.logger.info("AWS secret key: `%s`", cg.obscure(secret_key))
-
-        try:
-            client = boto3.client(
-                's3',
-                aws_access_key_id=access_key,
-                aws_secret_access_key=secret_key,
-                region_name=region
-            )
-            self.logger.info("Retrieved client successfully.")
-            self.logger.debug(f"Client: {client}")
-
-        except Exception as e:
-            self.logger.error("Failed to get client!")
-            self.logger.error(f"{e}")
-            return None
-
-        return client
-
-    def save_data_to_s3(self,
-                        client: boto3.client,
-                        save_location: str = SAVE_LOCATION,
-                        s3_file_name: str = SAVE_NAME,
-                        bucket: str = S3_BUCKET)\
-                                                 -> None:
-        """
-        Save data to the S3 bucket.
-        """
-        try:
-            with open(save_location, 'rb') as file_data:
-                client.put_object(Bucket=bucket, Key=s3_file_name, Body=file_data)
-            self.logger.info(f"Data successfully saved to S3 as `{s3_file_name}`.")
-        except Exception as e:
-            self.logger.error(f"Error saving data to S3: {e}")
-
 
 class Main:
     """
     Links much of the functionality of the helper classes together.
     """
     def __init__(self, 
-                 api_client: APIClient, 
-                 data_processor: DataProcessor, 
-                 logger: logging.Logger = logger,
-                 reference_data_path: str = REFERENCE_DATA,
-                 s3_access_key: str = AWS_ACCESS_KEY, 
-                 s3_secret_key: str = AWS_SECRET_KEY, 
-                 s3_region: str = AWS_REGION, 
-                 s3_bucket: str = S3_BUCKET, 
-                 s3_file_name: str = SAVE_NAME) -> None:
+                 api_client: APIClient,
+                 data_processor: CustomDataProcessor,
+                 reference_data_path: str = REFERENCE_DATA, 
+                 logger: logging.Logger = logger) -> None:
         """
         Initialize class variables.
         """
         self.api_client = api_client
         self.data_processor = data_processor
-        self.logger = logger
         self.reference_data_path = reference_data_path
-        self.s3_access_key = s3_access_key
-        self.s3_secret_key = s3_secret_key
-        self.s3_region = s3_region
-        self.s3_bucket = s3_bucket
-        self.s3_file_name = s3_file_name
+        self.logger = logger
 
     def execute(self) -> Optional[Tuple[pd.DataFrame, int]]:
         """
         Executes the full workflow: fetches data from the API, processes it,
         saves it locally, and uploads it to an S3 bucket.
         """
-        periods = self.api_client.get_settlement_periods(self.reference_data_path)
+        self.logger.info("Starting the execution of the workflow.")
+    
+        try:
+            periods = self.api_client.get_settlement_periods(self.reference_data_path)
+            self.logger.info(f"Retrieved settlement periods: {periods}")
 
-        response_list = self.api_client.fetch_data(periods)
-        if response_list:
-            
-            result = self.data_processor.process_data(response_list)
-            if result is not None:
-                df, number_of_settlement_periods = result
+            response_list = self.api_client.fetch_data(periods)
+            if response_list:
+                self.logger.info("Data successfully fetched from the API.")
 
-                self.logger.debug("DataFrame of Price Data:")
-                self.logger.debug(df.to_string())  # Log the entire DataFrame as a string
-                self.logger.info("Head of the DataFrame:")
-                self.logger.info("\n" + df.head().to_string())
-                self.logger.info("Number of Settlement Periods:")
-                self.logger.info(number_of_settlement_periods)
+                result = self.data_processor.process_data(response_list)
+                if result is not None:
+                    df, number_of_settlement_periods = result
 
-                self.data_processor.save_data_locally(df)
+                    self.logger.debug("DataFrame of Price Data:")
+                    self.logger.debug(df.to_string())  # Log the entire DataFrame as a string
+                    self.logger.info("Head of the DataFrame:")
+                    self.logger.info("\n" + df.head().to_string())
+                    self.logger.info("Number of Settlement Periods:")
+                    self.logger.info(number_of_settlement_periods)
 
-                s3_client = self.data_processor.get_s3_client(self.s3_access_key, self.s3_secret_key, self.s3_region)
+                    # Saving data locally
+                    self.logger.info("Saving data locally.")
+                    local_save_path = self.data_processor.save_data_locally(df)
+                    self.logger.info(f"Data successfully saved locally at {local_save_path}.")
 
-                if s3_client:
-                    self.data_processor.save_data_to_s3(s3_client, self.data_processor.save_location, self.s3_file_name, self.s3_bucket)
-                return df, number_of_settlement_periods
+                    # Uploading data to S3
+                    self.logger.info("Preparing to upload data to S3.")
+                    s3_client = self.data_processor.get_s3_client()
+
+                    if s3_client:
+                        self.logger.info("S3 client initialized successfully.")
+                        self.data_processor.save_data_to_s3()
+                        self.logger.info(f"Data successfully uploaded to S3 at `{self.data_processor.s3_file_name}`.")
+                    else:
+                        self.logger.error("Failed to initialize S3 client.")
+
+                    return df, number_of_settlement_periods
+                else:
+                    self.logger.error("Failed to process the data.")
             else:
-                self.logger.error("Failed to process the data.")
-        else:
-            self.logger.error("Failed to retrieve data from API.")
+                self.logger.error("Failed to retrieve data from the API.")
+        except Exception as e:
+            self.logger.error(f"An error occurred during the execution: {e}")
+        
+        self.logger.info("Execution of the workflow completed.")
         return None
 
 
@@ -237,8 +203,8 @@ def main() -> None:
     Runs everything
     """
 
-    # Setup Variables
-    script_name = SCRIPT_NAME 
+    # Declare Variables
+    script_name = SCRIPT_NAME
 
     # Setup logging and performance tracking
     performance_logger = cg.setup_subtle_logging(script_name)
@@ -247,7 +213,7 @@ def main() -> None:
 
     # Instantiate APIClient and DataProcessor with default arguments
     api_client = APIClient() 
-    data_processor = DataProcessor()  
+    data_processor = CustomDataProcessor()  
 
     # Instantiate Main class with default arguments
     main_class = Main(api_client, data_processor)
