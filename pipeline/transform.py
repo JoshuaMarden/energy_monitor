@@ -1,10 +1,6 @@
-from constants import Constants as ct
-import config as cg
 import os
 import logging
 import glob
-import datetime
-
 
 from dotenv import load_dotenv
 import boto3
@@ -13,6 +9,7 @@ from psycopg2.extensions import connection
 from psycopg2 import connect
 from psycopg2.extras import RealDictCursor, execute_values
 
+import config as cg
 
 load_dotenv()
 
@@ -100,8 +97,6 @@ class Transform:
         df['gain_loss'] = df['generation'].apply(
             lambda x: '+' if x > 0 else '-')
 
-        # cutoff = datetime.datetime.now() - datetime.timedelta(hours=1, minutes=5)
-        # df = df.query('publishTime != @cutoff')
         df = df[['publishTime', 'publish_date', 'fuelType', 'gain_loss',
                 'generation', 'settlementPeriod']]
         return list(df.itertuples(index=False, name=None))
@@ -168,7 +163,8 @@ class Load:
                         ON CONFLICT DO NOTHING"""
             execute_values(curr, sql_query, data['carbon'])
         if data['generation']:
-            sql_query = """INSERT INTO Generation (publish_time, publish_date, fuel_type, gain_loss, generated, settlement_period)
+            sql_query = """INSERT INTO Generation (publish_time, publish_date, 
+                        fuel_type, gain_loss, generated, settlement_period)
                         VALUES %s
                         ON CONFLICT DO NOTHING"""
             execute_values(curr, sql_query, data['generation'])
