@@ -27,6 +27,7 @@ SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 LOGGING_LEVEL = logging.DEBUG
 logger = cg.setup_logging(SCRIPT_NAME, LOGGING_LEVEL)
 
+
 class APIClient:
     """
     Constructs the default parameters for a request, and makes the request
@@ -47,10 +48,11 @@ class APIClient:
         Get a time range. Currently fetches data from 12 hours ago to present.
         """
         twelve_hours_ago = datetime.now(timezone.utc) - timedelta(hours=12)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc) - timedelta(hours=1)
 
         return {
-            'publishDateTimeFrom': twelve_hours_ago.isoformat(),  # ISO 8601 format, already UTC-aware
+            # ISO 8601 format, already UTC-aware
+            'publishDateTimeFrom': twelve_hours_ago.isoformat(),
             'publishDateTimeTo': now.isoformat(),
             'format': 'json'
         }
@@ -60,7 +62,8 @@ class APIClient:
         Uses the above-created time range to make an API request, returning data.
         """
         try:
-            response = requests.get(self.base_url, params=self.construct_default_params())
+            response = requests.get(
+                self.base_url, params=self.construct_default_params())
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -72,24 +75,24 @@ class CustomDataProcessor(DataProcessor):
     """
     Custom DataProcessor that implements a specific process_data method.
     """
-    
-    def __init__(self, save_location: str = SAVE_LOCATION, 
-                 aws_access_key: str = AWS_ACCESS_KEY, 
-                 aws_secret_key: str = AWS_SECRET_KEY, 
-                 region: str = AWS_REGION, 
-                 s3_file_name: str = SAVE_NAME, 
-                 bucket: str = S3_BUCKET, 
+
+    def __init__(self, save_location: str = SAVE_LOCATION,
+                 aws_access_key: str = AWS_ACCESS_KEY,
+                 aws_secret_key: str = AWS_SECRET_KEY,
+                 region: str = AWS_REGION,
+                 s3_file_name: str = SAVE_NAME,
+                 bucket: str = S3_BUCKET,
                  logger: logging.Logger = logger) -> None:
         """
         Initialize the CustomDataProcessor with the parent class constructor.
         """
         # Call the parent class's __init__ method
-        super().__init__(save_location, 
-                         aws_access_key, 
-                         aws_secret_key, 
-                         region, 
-                         s3_file_name, 
-                         bucket, 
+        super().__init__(save_location,
+                         aws_access_key,
+                         aws_secret_key,
+                         region,
+                         s3_file_name,
+                         bucket,
                          logger)
 
     def process_data(self, data: Dict[str, Any]) -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
@@ -113,10 +116,12 @@ class CustomDataProcessor(DataProcessor):
 
         return df, time_period
 
+
 class Main:
     """
     Links much of the functionality of the helper classes together.
     """
+
     def __init__(self,
                  api_client: APIClient,
                  data_processor: CustomDataProcessor,
@@ -155,7 +160,8 @@ class Main:
                     df, time_period = result
 
                     self.logger.debug("DataFrame of Demand Data:")
-                    self.logger.debug(df.to_string())  # Log the entire DataFrame as a string
+                    # Log the entire DataFrame as a string
+                    self.logger.debug(df.to_string())
                     self.logger.info("Head of the DataFrame:")
                     self.logger.info("\n" + df.head().to_string())
                     self.logger.info("Time Period of Data:")
@@ -164,7 +170,8 @@ class Main:
                     # Saving data locally
                     self.logger.info("Saving data locally.")
                     local_save_path = self.data_processor.save_data_locally(df)
-                    self.logger.info(f"Data successfully saved locally at {local_save_path}.")
+                    self.logger.info(f"Data successfully saved locally at {
+                                     local_save_path}.")
 
                     # Uploading data to S3
                     self.logger.info("Preparing to upload data to S3.")
@@ -173,7 +180,8 @@ class Main:
                     if s3_client:
                         self.logger.info("S3 client initialized successfully.")
                         self.data_processor.save_data_to_s3()
-                        self.logger.info(f"Data successfully uploaded to S3 at `{self.s3_file_name}`.")
+                        self.logger.info(f"Data successfully uploaded to S3 at `{
+                                         self.s3_file_name}`.")
                     else:
                         self.logger.error("Failed to initialize S3 client.")
 
@@ -184,7 +192,7 @@ class Main:
                 self.logger.error("Failed to retrieve data from API.")
         except Exception as e:
             self.logger.error(f"An error occurred during the execution: {e}")
-        
+
         self.logger.info("Execution of the workflow completed.")
         return None
 
@@ -198,13 +206,13 @@ def main() -> None:
     script_name = SCRIPT_NAME
 
     # Setup logging and performance tracking
-    performance_logger = cg.setup_subtle_logging(script_name)  
+    performance_logger = cg.setup_subtle_logging(script_name)
     profiler = cg.start_monitor()
     logger.info("---> Logging initiated.")
 
     # Instantiate APIClient and DataProcessor using their default values
-    api_client = APIClient() 
-    data_processor = CustomDataProcessor() 
+    api_client = APIClient()
+    data_processor = CustomDataProcessor()
 
     # Instantiate the Main class, using default values for S3 credentials and logger
     main_class = Main(api_client, data_processor)
@@ -216,7 +224,6 @@ def main() -> None:
     logger.info("---> Operation completed. Stopping performance monitor.")
     cg.stop_monitor(script_name, profiler, performance_logger)
     logger.info("---> Data inserted and process completed for %s.", script_name)
-
 
 
 if __name__ == "__main__":
