@@ -10,8 +10,9 @@ data/*
 *.feather
 
 # Misc Module Data 
-#(e.g __pycache__ directories)
-*pychache*
+#(e.g __pychache__ directories)
+__pychache__/
+**/__pycache__
 *.loc
 
 # Terraform

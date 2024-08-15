@@ -1,6 +1,6 @@
 """
 Connects to an S3 bucket, downloads, transforms and loads the data into a
-database 
+database
 """
 import os
 import logging
@@ -71,7 +71,7 @@ class Transform:
 
     def get_data(self) -> dict[tuple]:
         """
-        Turns downloaded files into an pandas dataframe, then Transforms the 
+        Turns downloaded files into an pandas dataframe, then Transforms the
         dataframe into a list of tuples
         """
         files = [file for file in glob.glob(
@@ -97,6 +97,13 @@ class Transform:
                 formatted_data = self.carbon_transform(df)
                 data['carbon'] = formatted_data
                 self.logger.info("""Successfully transformed carbon data""")
+
+        diff = list(set(self.period_g) - set(self.period_c))
+        for period in diff:
+            for values in data['generation']:
+                if values[5] == period:
+                    data['cost'].append((values[1], (values[5]), 0, 0))
+                    break
 
         self.delete_read_files(files)
         return data
@@ -141,22 +148,9 @@ class Transform:
         df = new_df.get(['from', 'forecast', 'carbon level'])
         return list(df.itertuples(index=False, name=None))
 
-    def split_intervals(self, row):
-        """
-        Turns 30 minute periods into 6 5 minute periods
-        """
-        intervals = pd.date_range(
-            start=row['from'], end=row['to'], freq='5min')
-        return pd.DataFrame({
-            'from': intervals[:-1],
-            'to': intervals[1:],
-            'forecast': row['forecast'],
-            'carbon level': row['carbon level']
-        })
-
     def delete_read_files(self, files):
         """
-        Removes downloaded files 
+        Removes downloaded files
         """
         for file in files:
             os.remove(file)
@@ -197,7 +191,9 @@ class Load:
         if data.get('cost'):
             sql_query = """INSERT INTO Cost (publish_date, settlement_period, sell_price, buy_price)
                         VALUES %s
-                        ON CONFLICT DO NOTHING"""
+                        ON CONFLICT (publish_date, settlement_period) DO UPDATE
+                        SET sell_price=EXCLUDED.sell_price,
+                        buy_price=EXCLUDED.buy_price"""
             execute_values(curr, sql_query, data['cost'])
         if data.get('demand'):
             sql_query = """INSERT INTO Carbon (publish_time, forecast, carbon_level)
