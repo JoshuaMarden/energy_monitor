@@ -90,7 +90,8 @@ class Transform:
                 self.logger.info("""Successfully transformed demand data""")
             if "cost" in file:
                 formatted_data = self.cost_transform(df)
-                data['cost'] = formatted_data
+                if formatted_data:
+                    data['cost'] = formatted_data
                 self.logger.info("""Successfully transformed cost data""")
             if "carbon" in file:
                 formatted_data = self.carbon_transform(df)
@@ -109,8 +110,8 @@ class Transform:
         df['gain_loss'] = df['generation'].apply(
             lambda x: '+' if x > 0 else '-')
 
-        df = df[['publishTime', 'publish_date', 'fuelType', 'gain_loss',
-                'generation', 'settlementPeriod']]
+        df = df.get(['publishTime', 'publish_date', 'fuelType', 'gain_loss',
+                     'generation', 'settlementPeriod'])
         return list(df.itertuples(index=False, name=None))
 
     def demand_transform(self, df: pd.DataFrame) -> tuple:
@@ -118,7 +119,7 @@ class Transform:
         Filters and transforms the demand dataframe passed into it and returns
         a list of tuples
         """
-        df = df[['startTime', 'demand']]
+        df = df.get(['startTime', 'demand'])
         return list(df.itertuples(index=False, name=None))
 
     def cost_transform(self, df: pd.DataFrame) -> tuple:
@@ -126,8 +127,8 @@ class Transform:
         Filters and transforms the cost dataframe passed into it and returns
         a list of tuples
         """
-        df = df[['settlementDate', 'settlementPeriod',
-                 'systemSellPrice', 'systemBuyPrice']]
+        df = df.get(['settlementDate', 'settlementPeriod',
+                     'systemSellPrice', 'systemBuyPrice'])
         return list(df.itertuples(index=False, name=None))
 
     def carbon_transform(self, df: pd.DataFrame) -> tuple:
@@ -137,7 +138,7 @@ class Transform:
         """
         new_df = pd.concat(
             df.apply(self.split_intervals, axis=1).to_list(), ignore_index=True)
-        df = new_df[['from', 'forecast', 'carbon level']]
+        df = new_df.get(['from', 'forecast', 'carbon level'])
         return list(df.itertuples(index=False, name=None))
 
     def split_intervals(self, row):
@@ -188,22 +189,22 @@ class Load:
         Loads the data into an RDS database
         """
         curr = conn.cursor(cursor_factory=RealDictCursor)
-        if data['demand']:
+        if data.get('demand'):
             sql_query = """INSERT INTO Demand (publish_time, Demand_amt)
                         VALUES %s
                         ON CONFLICT DO NOTHING"""
             execute_values(curr, sql_query, data['demand'])
-        if data['cost']:
+        if data.get('cost'):
             sql_query = """INSERT INTO Cost (publish_date, settlement_period, sell_price, buy_price)
                         VALUES %s
                         ON CONFLICT DO NOTHING"""
             execute_values(curr, sql_query, data['cost'])
-        if data['carbon']:
+        if data.get('demand'):
             sql_query = """INSERT INTO Carbon (publish_time, forecast, carbon_level)
                         VALUES %s
                         ON CONFLICT DO NOTHING"""
             execute_values(curr, sql_query, data['carbon'])
-        if data['generation']:
+        if data.get('demand'):
             sql_query = """INSERT INTO Generation (publish_time, publish_date,
                          fuel_type, gain_loss, generated, settlement_period)
                         VALUES %s

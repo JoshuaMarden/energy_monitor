@@ -24,7 +24,7 @@ resource "aws_iam_role" "lambda" {
     }]
     Version = "2012-10-17"
   })
-  managed_policy_arns = ["arn:aws:iam::aws:policy/AWSLambda_FullAccess", "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+  managed_policy_arns = ["arn:aws:iam::aws:policy/AWSLambda_FullAccess", "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",  "arn:aws:iam::aws:policy/AmazonS3FullAccess"]
   max_session_duration = 3600
   path                  = "/"
 }
@@ -186,7 +186,7 @@ resource "aws_iam_role" "extract_production" {
 resource "aws_scheduler_schedule" "lambda_schedule_30_min" {
   group_name                   = "default"
   name                         = "c12-energy-extract-production"
-  schedule_expression          = "cron(*/30 * * * ? *)"
+  schedule_expression          = "cron(*/1 * * * ? *)"
   schedule_expression_timezone = "UTC"
   state                        = "ENABLED"
   flexible_time_window {
@@ -245,7 +245,7 @@ resource "aws_iam_role" "extract_carbon" {
 resource "aws_scheduler_schedule" "lambda_schedule_1_day" {
   group_name                   = "default"
   name                         = "c12-energy-extract-carbon"
-  schedule_expression          = "cron(0 0 * * ? *)"
+  schedule_expression          = "cron(*/1 * * * ? *)"
   schedule_expression_timezone = "UTC"
   state                        = "ENABLED"
   flexible_time_window {
