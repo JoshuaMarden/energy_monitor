@@ -10,8 +10,8 @@ logs/*
 *.feather
 
 # Misc Module Data 
-#(e.g __pychache__ directories)
-__pychache__/
+#(e.g __pycache__ directories)
+*pychache*
 *.loc
 
 # Terraform
