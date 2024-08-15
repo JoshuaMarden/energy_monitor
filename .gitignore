@@ -4,8 +4,8 @@
 *.tfvars
 
 # Logs and Logging-Related
-**/tmp/
 logs/*
+data/*
 *.parquet
 *.feather
 
