@@ -1,3 +1,7 @@
+"""
+Mock dataframes for testing
+"""
+
 import pandas as pd
 
 def get_simple_mock_dataframe() -> pd.DataFrame:
