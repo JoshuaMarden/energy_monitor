@@ -4,15 +4,17 @@
 *.tfvars
 
 # Logs and Logging-Related
-**/tmp/
+data/*
 logs/*
 *.parquet
 *.feather
 
-# Misc Module Data 
+# Python Module Data
 #(e.g __pychache__ directories)
 __pychache__/
+**/__pychache__/
 *.loc
+*.pytest_cache
 
 # Terraform
 *.tfstate
