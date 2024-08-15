@@ -1,10 +1,7 @@
-from constants import Constants as ct
-import config as cg
 import os
 import logging
 import glob
 import datetime
-
 
 from dotenv import load_dotenv
 import boto3
@@ -13,6 +10,8 @@ from psycopg2.extensions import connection
 from psycopg2 import connect
 from psycopg2.extras import RealDictCursor, execute_values
 
+from constants import Constants as ct
+import config as cg
 
 load_dotenv()
 

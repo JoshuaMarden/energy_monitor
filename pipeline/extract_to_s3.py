@@ -1,10 +1,10 @@
 import os
 import logging
 import timeit
-from pipeline.extract_generation import main as extract_generation
+from extract_generation import main as extract_generation
 from extract_demand import main as extract_demand
 from extract_price import main as extract_price
-from extract_carbon import main as extract_carbon
+
 
 import config as cg
 
@@ -40,12 +40,6 @@ def pipeline():
     logger.info("==> Executing extract_price..")
     logger.info("===========")
     extract_time = timeit.timeit(extract_price, number=1)
-    logger.info("Extract script completed in %s seconds", extract_time)
-
-    logger.info("===========")
-    logger.info("==> Executing extract_carbon..")
-    logger.info("===========")
-    extract_time = timeit.timeit(extract_carbon, number=1)
     logger.info("Extract script completed in %s seconds", extract_time)
 
     logger.info("===============")
