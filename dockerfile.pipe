@@ -4,7 +4,6 @@ COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 
 COPY pipeline/transform.py .
-
 COPY pipeline/common.py .
 COPY config.py .
 COPY constants.py .
