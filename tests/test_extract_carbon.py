@@ -5,7 +5,6 @@ import pandas as pd
 from pipeline.extract_carbon import CustomDataProcessor
 from unittest.mock import patch, MagicMock
 from requests.exceptions import RequestException
-from tests.mock_data.mock_dataframes import get_dated_mock_dataframe
 
 
 @patch('pipeline.extract_carbon.requests.get')
