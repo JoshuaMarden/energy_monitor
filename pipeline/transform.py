@@ -12,6 +12,7 @@ import pandas as pd
 from psycopg2.extensions import connection
 from psycopg2 import connect
 from psycopg2.extras import RealDictCursor, execute_values
+import datetime
 
 import config as cg
 
@@ -97,12 +98,15 @@ class Transform:
                 formatted_data = self.carbon_transform(df)
                 data['carbon'] = formatted_data
                 self.logger.info("""Transformed carbon data""")
-
         diff = list(set(self.period_g) - set(self.period_c))
         for period in diff:
             for values in data['generation']:
+
                 if values[5] == period:
-                    data['cost'].append((values[1], (values[5]), 0, 0))
+                    if period == 2:
+                        yesterday = datetime.date.today() - datetime.timedelta(days=1)
+                        data['cost'].append((yesterday, 2, 0, 0))
+                    data['cost'].append((values[1], values[5], 0, 0))
                     break
 
         diff = list(set(self.time_g) - set(self.time_d))
@@ -110,6 +114,7 @@ class Transform:
             for values in data['generation']:
                 if values[0] == time:
                     data['demand'].append((values[0], 0))
+                    break
 
         self.delete_read_files(files)
         return data
@@ -146,6 +151,13 @@ class Transform:
         df = df.get(['settlementDate', 'settlementPeriod',
                      'systemSellPrice', 'systemBuyPrice'])
         self.period_c = df['settlementPeriod'].unique()
+        if 2 in self.period_c:
+            yesterday = datetime.date.today() - datetime.timedelta(days=1)
+            df.loc[len(df.index)] = [str(yesterday), 2, 0, 0]
+        if 1 in self.period_c:
+            yesterday = datetime.date.today() - datetime.timedelta(days=1)
+            df.loc[len(df.index)] = [str(yesterday), 1, 0, 0]
+        print(df)
         return list(df.itertuples(index=False, name=None))
 
     def carbon_transform(self, df: pd.DataFrame) -> tuple:
@@ -154,6 +166,10 @@ class Transform:
         a list of tuples
         """
         df = df.get(['from', 'forecast', 'carbon level'])
+        bins = [0, 34, 109, 189, 270, 1000]
+        labels = ["very low", "low", "moderate", "high", "very high"]
+        df['carbon level'] = pd.cut(
+            df['forecast'], bins=bins, labels=labels, right=True)
         return list(df.itertuples(index=False, name=None))
 
     def delete_read_files(self, files):
