@@ -54,6 +54,14 @@ class dashboard:
                                                                   y=alt.Y('forecast:Q', title='Carbon Intensity'), color='carbon_level').properties(width=650, height=400)
         return carbon_bar_chart
 
+    def time_of_lowest_carbon(self, carbon_df):
+        return carbon_df.loc[carbon_df["forecast"] == min(
+            carbon_df["forecast"].values), "publish_time"].dt.time.iloc[0]
+
+    def time_of_highest_carbon(self, carbon_df):
+        return carbon_df.loc[carbon_df["forecast"] == max(
+            carbon_df["forecast"].values), "publish_time"].dt.time.iloc[0]
+
     def generation_fuel_type(self, gen_df):
         fuel_types = ["BIOMASS", "CCGT", "COAL", "NPSHYD",
                       "NUCLEAR", "OCGT", "OIL", "OTHER", "PS", "WIND"]
@@ -61,9 +69,54 @@ class dashboard:
             fuel_types)]
 
         return alt.Chart(df_fuel_types[["publish_time", "generated", "fuel_type"]]).mark_line().encode(
-            x="publish_time", y="generated", color="fuel_type").properties(width=1000, height=1000)
+            x=alt.X('publish_time:T', title='Time'), y=alt.Y('generated:Q', title='Energy Generated MW'),
+            color="fuel_type").properties(width=1000, height=1000)
 
-    # def generation_interconnection(self, gen_df):
+    def intensity_factors_df(self):
+        intensity_factors = {'Energy Source': ['Biomass', 'Coal', 'Dutch Imports', 'French Imports', 'Gas (Combined Cycle)', 'Gas (Open Cycle)',
+                                               'Hydro', 'Irish Imports', 'Nuclear', 'Oil', 'Other', 'Pumped Storage', 'Solar', 'Wind'],
+                             'Intensity (gCO₂/kWh)': [120, 937, 474, 53, 394, 651, 0, 458, 0, 935, 300, 0, 0, 0],
+                             'Explanation': [
+            'Uses organic materials which result in moderate emissions.',
+            'High carbon emissions due to combustion of fossil fuels.',
+            'Mixed source imports with moderate carbon impact.',
+            'Imported nuclear and renewable energy with low emissions.',
+            'More efficient gas-burning technology, lower emissions.',
+            'Less efficient gas technology, higher emissions.',
+            'Zero emissions as it relies on water flow.',
+            'Mixed source imports with moderate carbon impact.',
+            'Zero emissions from nuclear reactions.',
+            'High emissions from oil combustion.',
+            'Varied sources with different emissions levels.',
+            'Storage method that does not emit carbon.',
+            'Zero emissions harnessing solar power.',
+            'Zero emissions capturing wind energy.']}
+
+        return pd.DataFrame(intensity_factors)
+
+    def generation_interconnection(self, gen_df):
+        interconnector_mapping = {
+            "INTELEC": "England(INTELEC)",
+            "INTEW": "Wales(INTEW)",
+            "INTFR": "France(INTFR)",
+            "INTGRNL": "Greenland(INTGRNL)",
+            "INTIFA2": "Ireland-Scotland(INTIFA2)",
+            "INTIRL": "Ireland(INTIRL)",
+            "INTNED": "Netherlands(INTNED)",
+            "INTNEM": "Belgium(INTNEM)",
+            "INTNSL": "Norway(INTNSL)",
+            "INTVKL": "Denmark(INTVKL)"
+        }
+
+        df_interconnectors = gen_df[gen_df['fuel_type'].isin(
+            interconnector_mapping)].copy()
+
+        df_interconnectors['fuel_type'] = df_interconnectors['fuel_type'].map(
+            interconnector_mapping)
+        df_interconnectors.rename(
+            columns={'fuel_type': 'country'}, inplace=True)
+
+        return alt.Chart(df_interconnectors[["publish_time", "generated", "country"]]).mark_line().encode(x=alt.X('publish_time:T', title='Time'), y=alt.Y('generated:Q', title='Energy Generated MW'), color="country").properties(width=1400, height=1000)
 
     def generate_dashboard(self, gen_df, demand_df, cost_df, carbon_df):
         st.set_page_config(layout="wide")
@@ -73,11 +126,25 @@ class dashboard:
             col1, col2 = st.columns(2)
             with col1:
                 st.altair_chart(self.carbon_plots(carbon_df))
+                carbon_container = st.container(border=True)
+                with carbon_container:
+                    low_col, high_col = carbon_container.columns(2)
+                    with low_col:
+                        st.metric(label="Lowest Carbon Footprint at:", value=f"{self.time_of_lowest_carbon(
+                            carbon_df)}", delta=f"{min(carbon_df["forecast"].values)}")
+                    with high_col:
+                        st.metric(label="Highest Carbon Footprint at:", value=f"{
+                            self.time_of_highest_carbon(carbon_df)}", delta=f"{max(carbon_df["forecast"].values)}", delta_color="inverse")
             with col2:
                 st.header("What is Carbon Intensity?")
                 st.write("The carbon intensity of electricity is a measure of how much CO2 emissions are produced per kilowatt hour of electricity consumed.The carbon intensity of electricity is sensitive to small changes in carbon-intensive generation. Carbon intensity varies due to changes in electricity demand, low carbon generation (wind, solar, hydro, nuclear, biomass) and conventional generation.")
                 with st.expander("Find out more"):
-                    st.write("TBC info")
+                    Method_tab, Factors_tab = st.tabs(
+                        ["Methodology", "Intensity Factors"])
+                    with Method_tab:
+                        st.write("The demand and generation by fuel type (gas, coal, wind, nuclear, solar etc.) for each region is forecast several days ahead at 30-min temporal resolution using an ensemble of state-of-the-art supervised Machine Learning (ML) regression models. An advanced model ensembling technique is used to blend the ML models to generate a new optimised meta-model. The forecasts are updated every 30 mins using a nowcasting technique to adjust the forecasts a short period ahead. The carbon intensity factors are applied to each technology type for each import generation mix to calculate the forecast")
+                    with Factors_tab:
+                        st.table(self.intensity_factors_df())
 
         with st.container():
             st.header("Energy Generation by Fuel Type")
@@ -98,16 +165,11 @@ class dashboard:
 - **PS (Pumped Storage)**: A type of hydropower generation where water is pumped to a higher elevation during low demand periods and released through turbines for electricity during high demand.
 - **WIND**: The use of wind turbines to convert wind energy into electricity. It's a clean, renewable source increasingly used worldwide, particularly in areas with strong, consistent winds.
 """)
-        '''            
+
         with st.container():
-            st.header("Energy Generation by Fuel Type")
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                st.altair_chart(self.generation_fuel_type(gen_df))
-            with col2:
-                with st.expander("Fuel Type Information"):
-                    st.write("")
-        '''
+            st.header("Where is your energy coming from ? ")
+            st.write("Interconnectors are high-voltage links allowing electricity to flow between regions or countries, providing crucial flexibility and reliability to power supplies. They help balance energy demand and supply, integrate renewable energy sources, and enhance grid resilience and sustainability. This leads to more stable electricity prices and a more reliable power supply for everyone.")
+            st.altair_chart(self.generation_interconnection(gen_df))
 
 
 if __name__ == "__main__":
