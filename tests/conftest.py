@@ -1,9 +1,9 @@
 """
 Fixtures for pytesting
 """
-import pytest
-from unittest.mock import MagicMock
 import logging
+from unittest.mock import MagicMock
+import pytest
 
 from pipeline.common import DataProcessor
 from pipeline.extract_generation import APIClient as APIClientGeneration
