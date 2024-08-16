@@ -25,11 +25,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        poetry install --with dev  # Install dev dependencies too
+        poetry install --with dev
 
     - name: Set up environment
       run: |
-        source ./add_root_to_path.sh  # Run the script to modify PYTHONPATH
+        poetry run bash ./add_root_to_path.sh  # Run the script inside Poetry's virtual environment
 
     - name: Run tests
       run: |
