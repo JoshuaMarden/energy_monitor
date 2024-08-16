@@ -2,12 +2,11 @@ import logging
 import os
 from typing import Any, Dict, Optional
 
-import boto3
 import pandas as pd
 import requests
 from dotenv import load_dotenv
 
-from common import DataProcessor
+from pipeline.common import DataProcessor
 import config as cg
 from constants import Constants as ct
 
