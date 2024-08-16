@@ -11,6 +11,9 @@ authors = ["Joshua"]
 python = "^3.8"
 # Add other dependencies here
 
+[tool.poetry.dev-dependencies]
+pytest = "^7.0"  # Add pytest as a dev dependency
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
