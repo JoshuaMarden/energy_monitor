@@ -52,6 +52,7 @@ class APIClient:
         df = pd.read_feather(path_to_reference_data)
         periods = df.groupby('settlementDate')['settlementPeriod'].unique().to_dict()
         periods = {k: list(v) for k, v in periods.items()}
+        logger.info(f"Getting price data for {periods}")
         return periods
 
     def construct_default_params(self, date: str, period: int) -> str:

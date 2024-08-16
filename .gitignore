@@ -8,6 +8,7 @@ data/*
 logs/*
 *.parquet
 *.feather
+*.log
 
 # Python Module Data
 #(e.g __pychache__ directories)

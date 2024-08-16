@@ -4,9 +4,9 @@ Test script for common.py
 
 from unittest.mock import MagicMock, patch
 
-def test_save_data_locally(data_processor, sample_dataframe, mock_logger):
+def test_save_data_locally(data_processor, simple_mock_dataframe, mock_logger):
     with patch("pandas.DataFrame.to_feather") as mock_to_feather:
-        data_processor.save_data_locally(sample_dataframe)
+        data_processor.save_data_locally(simple_mock_dataframe)
         
         # Check if to_feather was called with the correct path
         mock_to_feather.assert_called_once_with("mock_path")
