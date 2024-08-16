@@ -36,7 +36,6 @@ def test_fetch_data_failure(mock_get, api_client_carbon):
     assert result is None
     api_client_carbon.logger.error.assert_called_once_with("An error occurred: API request failed")
 
-import pandas as pd
 from tests.mock_data.mock_dataframes import get_dated_mock_dataframe
 
 def test_process_data_with_valid_data():
