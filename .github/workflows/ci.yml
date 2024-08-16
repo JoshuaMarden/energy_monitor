@@ -3,7 +3,6 @@
 # Looks like this is ignored by push unless you specificall add it:
 #  git add .github/workflows/ci.yml; git commit -m "updated actions workflow"; git push
 
-
 name: CI
 
 on: [push, pull_request]
