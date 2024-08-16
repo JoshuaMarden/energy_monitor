@@ -6,7 +6,8 @@ from unittest.mock import MagicMock
 import logging
 
 from pipeline.common import DataProcessor
-from pipeline.extract_generation import APIClient, CustomDataProcessor, Main
+from pipeline.extract_generation import APIClient as APIClientGeneration
+from pipeline.extract_demand import APIClient as APIClientDemand
 from tests.mock_data.mock_dataframes import get_simple_mock_dataframe
 
 @pytest.fixture
@@ -30,5 +31,15 @@ def data_processor(mock_logger):
     )
 
 @pytest.fixture
-def api_client(mock_logger):
-    return APIClient(base_url="mock_url", logger=mock_logger)
+def api_client_generation(mock_logger):
+    """
+    Fixture for APIClient from extract_generation
+    """
+    return APIClientGeneration(base_url="mock_url", logger=mock_logger)
+
+@pytest.fixture
+def api_client_demand(mock_logger):
+    """
+    Fixture for APIClient from extract_demand
+    """
+    return APIClientDemand(base_url="mock_url", logger=mock_logger)
