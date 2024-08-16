@@ -1,9 +1,11 @@
 """
 Test script for extract_demand.py
 """
+import pandas as pd
 import numpy as np
 from unittest.mock import patch, MagicMock, call
 from tests.mock_data.mock_dataframes import get_dated_mock_dataframe
+from pipeline.extract_demand import CustomDataProcessor
 
 
 @patch('pandas.read_feather')
@@ -81,10 +83,54 @@ def test_fetch_data_success(mock_get, mock_construct_default_params, api_client_
         {'data': 'Poitiers'},
         {'data': 'Agincourt'}
     ]
-    assert mock_get.call_count == 3 
+    assert mock_get.call_count == 3
 
     mock_construct_default_params.assert_has_calls([
         call("2024-08-16", 1),
         call("2024-08-16", 2),
         call("2024-08-17", 48)
     ])
+
+def test_process_data_with_valid_data():
+    """
+    Test the process_data method with valid data from a dated mock dataframe.
+    """
+    mock_df = get_dated_mock_dataframe()
+    sample_data = {"data": mock_df.to_dict(orient='records')}
+
+    processor = CustomDataProcessor()
+
+    df, time_period = processor.process_data(sample_data)
+
+    expected_time_period = {
+        "From": pd.Timestamp("1969-12-31T23:00:00"),
+        "To": pd.Timestamp("1999-12-31T23:00:00")
+    }
+    pd.testing.assert_frame_equal(df, mock_df)
+
+    assert time_period == expected_time_period
+
+def test_process_data_with_no_data(caplog):
+    """
+    Test the process_data method when no data is provided.
+    """
+
+    processor = CustomDataProcessor()
+
+    result = processor.process_data({})
+
+    assert result is None
+    assert "No data found in response." in caplog.text
+
+def test_process_data_with_missing_data_key(caplog):
+    """
+    Test the process_data method when the data dictionary
+    does not contain the "data" key.
+    """
+    processor = CustomDataProcessor()
+
+    result = processor.process_data({"other_key": "value"})
+
+    assert result is None
+    assert "No data found in response." in caplog.text
+

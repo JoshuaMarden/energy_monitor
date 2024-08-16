@@ -95,7 +95,6 @@ def test_process_data_with_valid_data():
     Test the process_data method with valid data from a dated mock dataframe.
     """
     mock_df = get_dated_mock_dataframe()
-    
     sample_data = {"data": mock_df.to_dict(orient='records')}
     
     processor = CustomDataProcessor()

@@ -84,12 +84,12 @@ class CustomDataProcessor(DataProcessor):
         Initialize the CustomDataProcessor with the parent class constructor.
         """
         # Call the parent class's __init__ method
-        super().__init__(save_location, 
-                         aws_access_key, 
-                         aws_secret_key, 
-                         region, 
-                         s3_file_name, 
-                         bucket, 
+        super().__init__(save_location,
+                         aws_access_key,
+                         aws_secret_key,
+                         region,
+                         s3_file_name,
+                         bucket,
                          logger)
 
     def process_data(self, data: Dict[str, Any],
