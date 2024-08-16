@@ -8,12 +8,14 @@ logs/*
 data/*
 *.parquet
 *.feather
+*.log
 
-# Misc Module Data 
+# Python Module Data
 #(e.g __pychache__ directories)
-__pychache__/
-**/__pycache__
+__pycache__/
+**/__pycache__/
 *.loc
+*.pytest_cache
 
 # Terraform
 *.tfstate

@@ -1,7 +1,6 @@
 """
 Holds the classes that are common the the pipelines' extract scripts
 """
-import requests
 import logging
 import pandas as pd
 import boto3

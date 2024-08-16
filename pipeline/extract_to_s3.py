@@ -7,8 +7,7 @@ from extract_price import main as extract_price
 
 
 import config as cg
-
-save_directory = 'tmp/data'
+save_directory = cg.DATA
 if not os.path.exists(save_directory):
     os.makedirs(save_directory)
 
