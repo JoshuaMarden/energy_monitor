@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 from dotenv import load_dotenv
 
-from common import DataProcessor
+from pipeline.common import DataProcessor
 import config as cg
 from constants import Constants as ct
 
@@ -97,7 +97,6 @@ class CustomDataProcessor(DataProcessor):
         """
         Initialize the CustomDataProcessor with the parent class constructor.
         """
-        # Call the parent class's __init__ method
         super().__init__(save_location, 
                          aws_access_key, 
                          aws_secret_key, 
