@@ -6,6 +6,8 @@ from pipeline.extract_generation import CustomDataProcessor
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone, timedelta
 from requests.exceptions import RequestException
+from tests.mock_data.mock_dataframes import get_dated_mock_dataframe
+
 
 def test_construct_default_params_manual(api_client):
     """
