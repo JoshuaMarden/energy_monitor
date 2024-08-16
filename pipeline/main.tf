@@ -327,21 +327,21 @@ resource "aws_ecs_task_definition" "energy-dashboard" {
     }
   }])
 }
-# resource "aws_ecs_service" "dashboard" {
-#     name                    = "c12-energy-dashboard"
-#     cluster                 = "arn:aws:ecs:eu-west-2:129033205317:cluster/c12-ecs-cluster"
-#     desired_count           = 1
-#     task_definition         = aws_ecs_task_definition.energy-dashboard.arn
-#     capacity_provider_strategy {
-#       capacity_provider = "FARGATE"
-#       base = 1
-#       weight = 100
+resource "aws_ecs_service" "dashboard" {
+    name                    = "c12-energy-dashboard"
+    cluster                 = "arn:aws:ecs:eu-west-2:129033205317:cluster/c12-ecs-cluster"
+    desired_count           = 1
+    task_definition         = aws_ecs_task_definition.energy-dashboard.arn
+    capacity_provider_strategy {
+      capacity_provider = "FARGATE"
+      base = 1
+      weight = 100
 
-#     }
+    }
     
-#     network_configuration {
-#         security_groups = [aws_security_group.dashboard_sg.id]
-#         subnets         = ["subnet-058f02e41ee6a5439", "subnet-0c459ebb007081668", "subnet-0ff947058bbc1165d"]
-#         assign_public_ip = true
-#   }
-# }
+    network_configuration {
+        security_groups = [aws_security_group.dashboard_sg.id]
+        subnets         = ["subnet-058f02e41ee6a5439", "subnet-0c459ebb007081668", "subnet-0ff947058bbc1165d"]
+        assign_public_ip = true
+  }
+}
