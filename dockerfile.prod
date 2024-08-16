@@ -1,0 +1,17 @@
+FROM python:latest
+
+COPY requirements.txt .
+RUN pip3 install -r requirements.txt
+
+COPY pipeline/extract_demand.py .
+COPY pipeline/extract_price.py .
+COPY pipeline/extract_generation.py .
+COPY pipeline/extract_to_s3.py .
+COPY pipeline/common.py .
+COPY config.py .
+COPY constants.py .
+
+
+EXPOSE 443
+
+CMD python3 extract_to_s3.py

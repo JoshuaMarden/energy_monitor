@@ -15,7 +15,8 @@ CREATE TABLE Carbon (
     PRIMARY KEY (publish_time)
 );
 CREATE TABLE Cost (
-    publish_date TIMESTAMP,
+
+    publish_date DATE,
     settlement_period INT,
     sell_price FLOAT,
     buy_price FLOAT,
@@ -23,13 +24,13 @@ CREATE TABLE Cost (
 );
 CREATE TABLE Generation (
     publish_time TIMESTAMP,
-    publish_date TIMESTAMP,
+    publish_date DATE,
+
     fuel_type VARCHAR(255),
     gain_loss VARCHAR(1),
     generated FLOAT,
     settlement_period INT,
     PRIMARY KEY (publish_time, fuel_type),
     FOREIGN KEY (publish_time) REFERENCES Demand(publish_time),
-    FOREIGN KEY (publish_time) REFERENCES Carbon(publish_time),
     FOREIGN KEY (publish_date,settlement_period) REFERENCES Cost(publish_date,settlement_period)
 );
