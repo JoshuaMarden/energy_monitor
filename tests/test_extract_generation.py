@@ -50,7 +50,7 @@ def test_construct_default_params_dynamic(api_client_generation):
         
         assert params == expected_params
 
-        
+
 @patch('pipeline.extract_generation.APIClient.construct_default_params')
 @patch('pipeline.extract_generation.requests.get')
 def test_fetch_data_success(mock_get, mock_construct_default_params, api_client_generation):
