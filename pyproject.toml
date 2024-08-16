@@ -1,0 +1,16 @@
+# Exists to run workflows
+
+
+[tool.poetry]
+name = "energy_monitor"
+version = "0.1.0"
+description = "Project"
+authors = ["Joshua"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+# Add other dependencies here
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
