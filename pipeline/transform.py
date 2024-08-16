@@ -1,6 +1,6 @@
 """
 Connects to an S3 bucket, downloads, transforms and loads the data into a
-database
+database 
 """
 import os
 import logging
@@ -72,7 +72,7 @@ class Transform:
 
     def get_data(self) -> dict[tuple]:
         """
-        Turns downloaded files into an pandas dataframe, then Transforms the
+        Turns downloaded files into an pandas dataframe, then Transforms the 
         dataframe into a list of tuples
         """
         files = [file for file in glob.glob(
@@ -174,7 +174,7 @@ class Transform:
 
     def delete_read_files(self, files):
         """
-        Removes downloaded files
+        Removes downloaded files 
         """
         for file in files:
             os.remove(file)
