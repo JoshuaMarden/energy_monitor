@@ -11,6 +11,10 @@ from common import DataProcessor
 import config as cg
 from constants import Constants as ct
 
+save_directory = 'tmp/data'
+if not os.path.exists(save_directory):
+    os.makedirs(save_directory)
+
 # Global constants
 ENDPOINT = ct.CARBON_ENDPOINT
 SAVE_NAME = ct.RAW_CARBON_DATA_NAME
@@ -61,24 +65,24 @@ class CustomDataProcessor(DataProcessor):
     """
     Custom DataProcessor that implements a specific process_data method.
     """
-    
-    def __init__(self, save_location: str = SAVE_LOCATION, 
-                 aws_access_key: str = AWS_ACCESS_KEY, 
-                 aws_secret_key: str = AWS_SECRET_KEY, 
-                 region: str = AWS_REGION, 
-                 s3_file_name: str = SAVE_NAME, 
-                 bucket: str = S3_BUCKET, 
+
+    def __init__(self, save_location: str = SAVE_LOCATION,
+                 aws_access_key: str = AWS_ACCESS_KEY,
+                 aws_secret_key: str = AWS_SECRET_KEY,
+                 region: str = AWS_REGION,
+                 s3_file_name: str = SAVE_NAME,
+                 bucket: str = S3_BUCKET,
                  logger: logging.Logger = logger) -> None:
         """
         Initialize the CustomDataProcessor with the parent class constructor.
         """
         # Call the parent class's __init__ method
-        super().__init__(save_location, 
-                         aws_access_key, 
-                         aws_secret_key, 
-                         region, 
-                         s3_file_name, 
-                         bucket, 
+        super().__init__(save_location,
+                         aws_access_key,
+                         aws_secret_key,
+                         region,
+                         s3_file_name,
+                         bucket,
                          logger)
 
     def process_data(self, data: Dict[str, Any],
@@ -87,7 +91,7 @@ class CustomDataProcessor(DataProcessor):
         Takes data, places it in DataFrame, and reformats it.
         """
         logger = logger or logging.getLogger(__name__)
-        
+
         if not data or "data" not in data:
             logger.warning("No data found in response.")
             return None
@@ -105,6 +109,7 @@ class Main:
     """
     Links much of the functionality of the helper classes together.
     """
+
     def __init__(self,
                  api_client: APIClient,
                  data_processor: CustomDataProcessor,
@@ -133,14 +138,14 @@ class Main:
         """
         self.logger.info("Starting data fetch from API.")
         data = self.api_client.fetch_data()
-        
+
         if data:
             self.logger.info("Data fetched successfully from API.")
             self.logger.debug(f"Fetched Data: {data}")
 
             self.logger.info("Processing the fetched data.")
             df = self.data_processor.process_data(data)
-            
+
             if df is not None:
                 self.logger.info("Data processed successfully into DataFrame.")
                 self.logger.debug("DataFrame of Carbon Forecast Data:")
@@ -148,7 +153,8 @@ class Main:
 
                 self.logger.info("Saving the processed data locally.")
                 self.data_processor.save_data_locally(df)
-                self.logger.info(f"Data saved locally at `{self.data_processor.save_location}`.")
+                self.logger.info(f"Data saved locally at `{
+                                 self.data_processor.save_location}`.")
 
                 self.logger.info("Attempting to get S3 client.")
                 s3_client = self.data_processor.get_s3_client()
@@ -157,15 +163,18 @@ class Main:
                     self.logger.info("S3 client retrieved successfully.")
                     self.logger.info("Uploading the data to S3.")
                     self.data_processor.save_data_to_s3()
-                    self.logger.info(f"Data successfully uploaded to S3 bucket `{self.s3_bucket}` as `{self.s3_file_name}`.")
+                    self.logger.info(f"Data successfully uploaded to S3 bucket `{
+                                     self.s3_bucket}` as `{self.s3_file_name}`.")
                 else:
-                    self.logger.error("Failed to get S3 client. Data was not uploaded to S3.")
+                    self.logger.error(
+                        "Failed to get S3 client. Data was not uploaded to S3.")
                 return df
             else:
-                self.logger.error("Failed to process the data into a DataFrame.")
+                self.logger.error(
+                    "Failed to process the data into a DataFrame.")
         else:
             self.logger.error("Failed to retrieve data from API.")
-        
+
         return None
 
 
@@ -173,19 +182,19 @@ def main() -> None:
     """
     Runs everything
     """
-    
+
     # Setup Variables
-    script_name = SCRIPT_NAME 
+    script_name = SCRIPT_NAME
     save_location = SAVE_LOCATION
 
     # Setup logging and performance tracking
-    performance_logger = cg.setup_subtle_logging(script_name)  
+    performance_logger = cg.setup_subtle_logging(script_name)
     profiler = cg.start_monitor()
     logger.info("---> Logging initiated.")
 
     # Instantiate APIClient and DataProcessor using their default values
-    api_client = APIClient() 
-    data_processor = CustomDataProcessor(save_location)  
+    api_client = APIClient()
+    data_processor = CustomDataProcessor(save_location)
 
     # Instantiate Main class with default arguments
     main_class = Main(api_client, data_processor)
@@ -197,6 +206,7 @@ def main() -> None:
     logger.info("---> Operation completed. Stopping performance monitor.")
     cg.stop_monitor(script_name, profiler, performance_logger)
     logger.info("---> Data inserted and process completed for %s.", script_name)
+
 
 if __name__ == "__main__":
     main()

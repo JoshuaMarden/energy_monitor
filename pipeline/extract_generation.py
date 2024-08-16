@@ -48,7 +48,7 @@ class APIClient:
         Get a time range. Currently fetches data from 12 hours ago to present.
         """
         twelve_hours_ago = datetime.now(timezone.utc) - timedelta(hours=12)
-        now = datetime.now(timezone.utc) - timedelta(hours=1)
+        now = datetime.now(timezone.utc)
 
         return {
             # ISO 8601 format, already UTC-aware
