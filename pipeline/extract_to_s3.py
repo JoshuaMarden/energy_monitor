@@ -41,12 +41,6 @@ def pipeline():
     extract_time = timeit.timeit(extract_price, number=1)
     logger.info("Extract script completed in %s seconds", extract_time)
 
-    logger.info("===========")
-    logger.info("==> Executing extract_carbon..")
-    logger.info("===========")
-    extract_time = timeit.timeit(extract_carbon, number=1)
-    logger.info("Extract script completed in %s seconds", extract_time)
-
     logger.info("===============")
     logger.info("==> Extract Scripts Complete!")
     logger.info("=======================================|")
