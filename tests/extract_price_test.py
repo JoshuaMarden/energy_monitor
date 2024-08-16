@@ -1,12 +1,8 @@
 """
 Test script for extract_demand.py
 """
-import pandas as pd
 import numpy as np
-from pipeline.extract_price import CustomDataProcessor, APIClient
-from unittest.mock import patch, MagicMock
-from datetime import datetime, timezone, timedelta
-from requests.exceptions import RequestException
+from unittest.mock import patch, MagicMock, call
 from tests.mock_data.mock_dataframes import get_dated_mock_dataframe
 
 
@@ -32,3 +28,63 @@ def test_get_settlement_periods(mock_read_feather, api_client_price):
 
     assert result == expected_result
     mock_read_feather.assert_called_once_with(custom_reference_data_path)
+
+
+def test_construct_default_params(api_client_price):
+    """
+    Check construction of defualt paramteres is done properly
+    """
+    date = "1970-01-01"
+    period = 999
+
+    result = api_client_price.construct_default_params(date=date, period=period)
+
+    expected_result = "mock_url/1970-01-01/999?format=json"
+    assert result == expected_result
+
+@patch('pipeline.extract_price.APIClient.construct_default_params')
+@patch('pipeline.extract_price.requests.get')
+def test_fetch_data_success(mock_get, mock_construct_default_params, api_client_price):
+    """
+    Test the fetch_data method.
+    """
+    periods = {
+        '2024-08-16': [1, 2],
+        '2024-08-17': [48]
+    }
+
+    mock_construct_default_params.side_effect = [
+        "mock_api/2024-08-16/1?format=json",
+        "mock_api2024-08-16/2?format=json",
+        "mock_api/2024-08-17/48?format=json"
+    ]
+
+    # Mock API responses
+    mock_response_1 = MagicMock()
+    mock_response_1.json.return_value = {'data': 'Crécy'}
+    mock_response_1.raise_for_status.return_value = None
+
+    mock_response_2 = MagicMock()
+    mock_response_2.json.return_value = {'data': 'Poitiers'}
+    mock_response_2.raise_for_status.return_value = None
+
+    mock_response_3 = MagicMock()
+    mock_response_3.json.return_value = {'data': 'Agincourt'}
+    mock_response_3.raise_for_status.return_value = None
+
+    mock_get.side_effect = [mock_response_1, mock_response_2, mock_response_3]
+
+    result = api_client_price.fetch_data(periods)
+
+    assert result == [
+        {'data': 'Crécy'},
+        {'data': 'Poitiers'},
+        {'data': 'Agincourt'}
+    ]
+    assert mock_get.call_count == 3 
+
+    mock_construct_default_params.assert_has_calls([
+        call("2024-08-16", 1),
+        call("2024-08-16", 2),
+        call("2024-08-17", 48)
+    ])
