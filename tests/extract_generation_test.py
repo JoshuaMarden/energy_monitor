@@ -1,7 +1,8 @@
 """
 Test script for extract_production.py
 """
-from pipeline.extract_generation import APIClient
+import pandas as pd
+from pipeline.extract_generation import CustomDataProcessor
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone, timedelta
 from requests.exceptions import RequestException
@@ -86,3 +87,48 @@ def test_fetch_data_failure(mock_get, api_client):
     assert result is None
 
     api_client.logger.error.assert_called_once_with("An error occurred: API request failed")
+
+def test_process_data_with_valid_data():
+    """
+    Test the process_data method with valid data from a dated mock dataframe.
+    """
+    mock_df = get_dated_mock_dataframe()
+
+    sample_data = {"data": mock_df.to_dict(orient='records')}
+
+    expected_time_period = {
+        "publishTimeStart": pd.Timestamp("1970-01-01T00:00:00"),
+        "publishTimeEnd": pd.Timestamp("2000-01-01T00:00:00")
+    }
+
+    processor = CustomDataProcessor()
+
+    df, time_period = processor.process_data(sample_data)
+
+    pd.testing.assert_frame_equal(df, mock_df)
+    assert time_period == expected_time_period
+
+def test_process_data_with_no_data(caplog):
+    """
+    Test the process_data method when no data is provided.
+    """
+    processor = CustomDataProcessor()
+
+    result = processor.process_data({})
+
+    assert result is None
+
+    assert "No data found in response." in caplog.text
+
+def test_process_data_with_missing_data_key(caplog):
+    """
+    Test the process_data method when the data dictionary
+    does not contain the "data" key.
+    """
+    processor = CustomDataProcessor()
+
+    result = processor.process_data({"other_key": "value"})
+
+    assert result is None
+
+    assert "No data found in response." in caplog.text
