@@ -16,33 +16,33 @@ jobs:
 
     - name: Create and activate virtual environment
       run: |
-        python -m venv venv  # Create a virtual environment
-        source venv/bin/activate  # Activate the virtual environment
+        python -m venv venv  
+        source venv/bin/activate
 
     - name: Install dependencies
       run: |
-        source venv/bin/activate  # Ensure the virtual environment is active
-        pip install --upgrade pip  # Upgrade pip within the virtual environment
-        pip install -r requirements.txt  # Install dependencies from requirements.txt
-        pip install pytest-cov  # Install pytest-cov for coverage reporting
+        source venv/bin/activate  
+        pip install --upgrade pip  
+        pip install -r requirements.txt 
+        pip install pytest-cov  
 
     - name: Set up environment
       run: |
-        source venv/bin/activate  # Ensure the virtual environment is active
-        export PYTHONPATH="$PYTHONPATH:$(pwd)"  # Set PYTHONPATH to the current directory
-        source ./add_root_to_path.sh  # (Optional) Run additional setup if needed
+        source venv/bin/activate 
+        export PYTHONPATH="$PYTHONPATH:$(pwd)"  
+        source ./add_root_to_path.sh  
 
     - name: Run tests with coverage
       run: |
-        source venv/bin/activate  # Ensure the virtual environment is active
-        export PYTHONPATH="$PYTHONPATH:$(pwd)"  # Ensure PYTHONPATH is still set
-        pytest --cov=./  # Run tests with coverage reporting
+        source venv/bin/activate  
+        export PYTHONPATH="$PYTHONPATH:$(pwd)" 
+        pytest --cov=./ --cov-report=xml:coverage.xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}  # Set this in your GitHub repository settings
-        files: ./coverage.xml  # Path to the coverage file
-        flags: unittests  # Optional flag to distinguish coverage reports
-        name: code-coverage-report  # Optional report name
-        fail_ci_if_error: true  # Fail the CI if the upload fails
+        token: ${{ secrets.CODECOV_TOKEN }}  
+        files: ./coverage.xml
+        flags: unittests
+        name: code-coverage-report
+        fail_ci_if_error: true
