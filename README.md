@@ -18,9 +18,7 @@
 ![GitHub Last Commit](https://img.shields.io/github/last-commit/JoshuaMarden/energy_monitor)
 ![GitHub Contributors](https://img.shields.io/github/contributors/JoshuaMarden/energy_monitor)
 [![Maintainability](https://api.codeclimate.com/v1/badges/2b5506b2c460c017238e/maintainability)](https://codeclimate.com/github/JoshuaMarden/energy_monitor/maintainability)
-[![Requirements Status](https://requires.io/github/JoshuaMarden/energy_monitor/requirements.svg?branch=main)](https://requires.io/github/JoshuaMarden/energy_monitor/requirements/?branch=main)
-[![codecov](https://codecov.io/gh/yourusername/your-repository/branch/main/graph/badge.svg?token=YOURTOKEN)](https://codecov.io/gh/yourusername/your-repository)
-
+[![codecov](https://codecov.io/gh/yourusername/your-repository/branch/main/graph/badge.svg?token=YOURTOKEN)](https://codecov.io/gh/JoshuaMarden/energy_monitor)
 
 
 ## Installation
