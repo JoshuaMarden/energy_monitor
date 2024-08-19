@@ -12,16 +12,23 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
 
+    - name: Create and activate virtual environment
+      run: |
+        python -m venv venv  # Create a virtual environment
+        source venv/bin/activate  # Activate the virtual environment
+
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -e .  # Install the package using setup.py, which reads from requirements.txt if set up
+        pip install --upgrade pip  # Upgrade pip within the virtual environment
+        pip install -r requirements.txt  # Install dependencies from requirements.txt
+        pip install -e .  # Install the package in editable mode using setup.py
 
-    - name: Activate virtual environment and set up environment
+    - name: Set up environment
       run: |
-        source $(python -m site --user-site)/../bin/activate  # Activate the venv
-        source ./add_root_to_path.sh  # Run the script after activation
-        
+        source venv/bin/activate  # Ensure the virtual environment is active
+        source ./add_root_to_path.sh  # Run the script to modify PYTHONPATH
+
     - name: Run tests
       run: |
+        source venv/bin/activate  # Ensure the virtual environment is active
         pytest  # Run tests directly with pytest
