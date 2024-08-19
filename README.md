@@ -9,7 +9,7 @@
 ! We'll add some visuals here maybe, using [Asciinema](https://asciinema.org/) or using [ttygif](https://github.com/icholy/ttygif) and a recording. !
 
 ## Badges
-! Are we doing badges? !
+[![CI](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/ci.yml)
 
 ## Installation
 [Clone the repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) from github.
