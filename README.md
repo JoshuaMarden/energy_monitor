@@ -83,7 +83,7 @@ SOFTWARE.
 
 ## Testing Coverage Visualised
 
-https://codecov.io/github/JoshuaMarden/energy_monitor/graphs/sunburst.svg?token=5CLXJXIEE8
+![Coverage Sunburst](https://codecov.io/github/JoshuaMarden/energy_monitor/graphs/sunburst.svg?token=5CLXJXIEE8)
 
 
 
