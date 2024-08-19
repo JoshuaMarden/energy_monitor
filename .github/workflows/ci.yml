@@ -1,5 +1,3 @@
-name: CI
-
 on: [push, pull_request]
 
 jobs:
@@ -14,32 +12,29 @@ jobs:
 
     - name: Create and activate virtual environment
       run: |
-        python -m venv .venv  # Create a virtual environment
-        source .venv/bin/activate  # Activate the virtual environment
+        python -m venv venv  # Create a virtual environment
+        source venv/bin/activate  # Activate the virtual environment
 
     - name: Install dependencies
       run: |
-        source .venv/bin/activate  # Ensure the virtual environment is active
+        source venv/bin/activate  # Ensure the virtual environment is active
         pip install --upgrade pip  # Upgrade pip within the virtual environment
         pip install -r requirements.txt  # Install dependencies from requirements.txt
         pip install codeclimate-test-reporter  # Install CodeClimate Test Reporter
 
     - name: Set up environment
       run: |
-        source .venv/bin/activate  # Ensure the virtual environment is active
+        source venv/bin/activate  # Ensure the virtual environment is active
         source ./add_root_to_path.sh  # Run the script to modify PYTHONPATH
-        echo $PYTHONPATH  # Debugging: Check if PYTHONPATH is correctly set
 
     - name: Run tests with coverage
-      env:
-        PYTHONPATH: ${{ github.workspace }}  # Set PYTHONPATH to the project root
       run: |
-        source .venv/bin/activate  # Ensure the virtual environment is active
-        pytest --cov=. --cov-report=xml tests/  # Run tests in the `tests` directory
+        source venv/bin/activate  # Ensure the virtual environment is active
+        pytest --cov=your_package --cov-report=xml  # Generate coverage report
 
     - name: Upload coverage to CodeClimate
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}  # Use the secret for CodeClimate
       run: |
-        source .venv/bin/activate  # Ensure the virtual environment is active
+        source venv/bin/activate  # Ensure the virtual environment is active
         codeclimate-test-reporter < coverage.xml  # Upload the coverage report to CodeClimate
