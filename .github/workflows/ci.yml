@@ -17,10 +17,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e .  # Install the package using setup.py, which reads from requirements.txt if set up
 
-    - name: Set up environment
+    - name: Activate virtual environment and set up environment
       run: |
-        source ./add_root_to_path.sh  # Run the script to modify PYTHONPATH
-
+        source $(python -m site --user-site)/../bin/activate  # Activate the venv
+        source ./add_root_to_path.sh  # Run the script after activation
+        
     - name: Run tests
       run: |
         pytest  # Run tests directly with pytest
