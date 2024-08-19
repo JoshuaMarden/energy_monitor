@@ -11,7 +11,7 @@ from pipeline.extract_demand import APIClient as APIClientDemand
 from pipeline.extract_price import APIClient as APIClientPrice
 from pipeline.extract_carbon import APIClient as APIClientCarbon
 
-from tests.mock_data.mock_dataframes import get_simple_mock_dataframe
+from mock_data.mock_dataframes import get_simple_mock_dataframe
 
 @pytest.fixture
 def mock_logger():
