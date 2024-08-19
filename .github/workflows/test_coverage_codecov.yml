@@ -25,7 +25,6 @@ jobs:
         source venv/bin/activate  # Ensure the virtual environment is active
         pip install --upgrade pip  # Upgrade pip within the virtual environment
         pip install -r requirements.txt  # Install dependencies from requirements.txt
-        pip install pytest-cov  # Install pytest-cov for coverage reporting
 
     - name: Set up environment
       run: |
@@ -38,6 +37,13 @@ jobs:
         source venv/bin/activate
         export PYTHONPATH="$PYTHONPATH:$(pwd)"
         pytest --cov=./ --cov-report=xml:coverage.xml  # Generate coverage.xml in the current directory
+
+    - name: Report to Code Climate
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_TEST_REPORTER_ID }}
+      run: |
+        source venv/bin/activate
+        codeclimate-test-reporter < coverage.xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
