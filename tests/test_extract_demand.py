@@ -6,7 +6,7 @@ from pipeline.extract_demand import CustomDataProcessor
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone, timedelta
 from requests.exceptions import RequestException
-from tests.mock_data.mock_dataframes import get_dated_mock_dataframe
+from mock_data.mock_dataframes import get_dated_mock_dataframe
 
 
 def test_construct_default_params_manual(api_client_demand):
@@ -88,7 +88,7 @@ def test_fetch_data_failure(mock_get, api_client_demand):
 
     assert result is None
 
-    api_client_demand.logger.error.assert_called_once_with("An error occurred: API request failed")
+    api_client_demand.logger.error.assert_called_once_with("An error occurred: %s", mock_get.side_effect)
 
 def test_process_data_with_valid_data():
     """
