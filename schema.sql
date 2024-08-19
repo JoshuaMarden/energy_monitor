@@ -15,6 +15,7 @@ CREATE TABLE Carbon (
     PRIMARY KEY (publish_time)
 );
 CREATE TABLE Cost (
+
     publish_date DATE,
     settlement_period INT,
     sell_price FLOAT,
@@ -24,6 +25,7 @@ CREATE TABLE Cost (
 CREATE TABLE Generation (
     publish_time TIMESTAMP,
     publish_date DATE,
+
     fuel_type VARCHAR(255),
     gain_loss VARCHAR(1),
     generated FLOAT,
