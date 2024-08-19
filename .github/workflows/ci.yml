@@ -19,7 +19,7 @@ jobs:
       run: |
         source venv/bin/activate  # Ensure the virtual environment is active
         pip install --upgrade pip  # Upgrade pip within the virtual environment
-        pip install 'coverage=4.4'  # Install a compatible version of coverage.py
+        pip install 'coverage==4.4'  # Install a compatible version of coverage.py
         pip install -r requirements.txt  # Install dependencies from requirements.txt
         pip install codeclimate-test-reporter  # Install CodeClimate Test Reporter
 
