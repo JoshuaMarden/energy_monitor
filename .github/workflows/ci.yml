@@ -19,33 +19,15 @@ jobs:
       run: |
         source venv/bin/activate  # Ensure the virtual environment is active
         pip install --upgrade pip  # Upgrade pip within the virtual environment
-        pip install 'coverage==4.4'  # Install a compatible version of coverage.py
         pip install -r requirements.txt  # Install dependencies from requirements.txt
-        pip install codeclimate-test-reporter  # Install CodeClimate Test Reporter
-
-    - name: Set up environment
-      run: |
-        source venv/bin/activate  # Ensure the virtual environment is active
-        source ./add_root_to_path.sh  # Run the script to modify PYTHONPATH
 
     - name: Run tests with coverage
       run: |
         source venv/bin/activate  # Ensure the virtual environment is active
-        pytest --cov=. --cov-report=xml:coverage.xml  # Generate coverage report in the current directory
+        pytest --cov=. --cov-report=xml  # Generate coverage report in XML format
 
-    - name: List files in the directory after tests
-      run: ls -la
-
-    - name: Check if coverage.xml exists
-      run: |
-        if [ ! -f coverage.xml ]; then
-          echo "coverage.xml not found!"
-          exit 1
-        fi
-
-    - name: Upload coverage to CodeClimate
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}  # Use the secret for CodeClimate
-      run: |
-        source venv/bin/activate  # Ensure the virtual environment is active
-        codeclimate-test-reporter < coverage.xml  # Upload the coverage report to CodeClimate
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: coverage.xml  # Path to your coverage report
+        token: ${{ secrets.CODECOV_TOKEN }}  # Set this in your repository secrets
