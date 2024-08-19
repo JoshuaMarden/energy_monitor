@@ -64,7 +64,7 @@ class APIClient:
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            self.logger.error(f"An error occurred: {e}")
+            self.logger.error("An error occurred: %s", e)
             return None
 
 
@@ -100,7 +100,6 @@ class CustomDataProcessor(DataProcessor):
         a pd.DataFrame, the second element is a dictionary containing the
         time window over which the data was fetched.
         """
-        logger = logger or self.logger
 
         if not data or "data" not in data:
             logger.warning("No data found in response.")
@@ -159,16 +158,16 @@ class Main:
                     df, time_period = result
 
                     self.logger.debug("DataFrame of Demand Data:")
-                    self.logger.debug(df.to_string())  # Log the entire DataFrame as a string
+                    self.logger.debug("%s", df.to_string())  # Log the entire DataFrame as a string
                     self.logger.info("Head of the DataFrame:")
-                    self.logger.info("\n" + df.head().to_string())
+                    self.logger.info("\n%s", df.head().to_string())
                     self.logger.info("Time Period of Data:")
-                    self.logger.info(time_period)
+                    self.logger.info("%s", time_period)
 
                     # Saving data locally
                     self.logger.info("Saving data locally.")
                     local_save_path = self.data_processor.save_data_locally(df)
-                    self.logger.info(f"Data successfully saved locally at {local_save_path}.")
+                    self.logger.info("Data successfully saved locally at %s.", local_save_path)
 
                     # Uploading data to S3
                     self.logger.info("Preparing to upload data to S3.")
@@ -177,7 +176,7 @@ class Main:
                     if s3_client:
                         self.logger.info("S3 client initialized successfully.")
                         self.data_processor.save_data_to_s3()
-                        self.logger.info(f"Data successfully uploaded to S3 at `{self.s3_file_name}`.")
+                        self.logger.info("Data successfully uploaded to S3 at `%s`.", self.s3_file_name)
                     else:
                         self.logger.error("Failed to initialize S3 client.")
 
@@ -187,7 +186,7 @@ class Main:
             else:
                 self.logger.error("Failed to retrieve data from API.")
         except Exception as e:
-            self.logger.error(f"An error occurred during the execution: {e}")
+            self.logger.error("An error occurred during the execution: %s", e)
         
         self.logger.info("Execution of the workflow completed.")
         return None
