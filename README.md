@@ -12,7 +12,7 @@
 
 [![Unittests](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/unittests.yml/badge.svg)](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/unittests.yml)
  
-[![codecov](https://codecov.io/gh/JoshuaMarden/energy_monitor/branch/main/graph/badge.svg)](https://codecov.io/gh/JoshuaMarden/energy_monitor)
+[![codecov](https://codecov.io/github/JoshuaMarden/energy_monitor/graph/badge.svg?token=5CLXJXIEE8)](https://codecov.io/github/JoshuaMarden/energy_monitor)
  
 ![License](https://img.shields.io/github/license/JoshuaMarden/energy_monitor)
  
