@@ -1,0 +1,49 @@
+name: Coverage
+
+on: [push, pull_request]
+
+jobs:
+  upload-coverage:
+    name: Generate and Upload Coverage Report
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Create and activate virtual environment
+      run: |
+        python -m venv venv  # Create a virtual environment
+        source venv/bin/activate  # Activate the virtual environment
+
+    - name: Install dependencies
+      run: |
+        source venv/bin/activate  # Ensure the virtual environment is active
+        pip install --upgrade pip  # Upgrade pip within the virtual environment
+        pip install -r requirements.txt  # Install dependencies from requirements.txt
+        pip install pytest-cov  # Install pytest-cov for coverage reporting
+
+    - name: Set up environment
+      run: |
+        source venv/bin/activate
+        export PYTHONPATH="$PYTHONPATH:$(pwd)"
+        source ./add_root_to_path.sh
+
+    - name: Run tests with coverage
+      run: |
+        source venv/bin/activate
+        export PYTHONPATH="$PYTHONPATH:$(pwd)"
+        pytest --cov=./ --cov-report=xml:coverage.xml  # Generate coverage.xml in the current directory
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}  
+        files: coverage.xml  # Ensure this matches the actual location of coverage.xml
+        flags: unittests  # Optional flag to distinguish coverage reports
+        name: code-coverage-report  # Optional report name
+        fail_ci_if_error: true  # Fail the CI if the upload fails

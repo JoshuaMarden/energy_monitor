@@ -10,25 +10,21 @@
 
 ## Badges
 
-[![CI](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/ci.yml)
-![License](https://img.shields.io/github/license/JoshuaMarden/energy_monitor)
-![GitHub Stars](https://img.shields.io/github/stars/JoshuaMarden/energy_monitor.svg?style=social&label=Star)
-![GitHub Last Commit](https://img.shields.io/github/last-commit/JoshuaMarden/energy_monitor)
-![GitHub Contributors](https://img.shields.io/github/contributors/JoshuaMarden/energy_monitor)
-[![Maintainability](https://api.codeclimate.com/v1/badges/2b5506b2c460c017238e/maintainability)](https://codeclimate.com/github/JoshuaMarden/energy_monitor/maintainability)
+[![Unittests](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/unittests.yml/badge.svg)](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/unittests.yml)  [![codecov](https://codecov.io/github/JoshuaMarden/energy_monitor/graph/badge.svg?token=5CLXJXIEE8)](https://codecov.io/github/JoshuaMarden/energy_monitor)  ![License](https://img.shields.io/github/license/JoshuaMarden/energy_monitor)  ![GitHub Stars](https://img.shields.io/github/stars/JoshuaMarden/energy_monitor.svg?style=social&label=Star)  ![GitHub Last Commit](https://img.shields.io/github/last-commit/JoshuaMarden/energy_monitor)  ![GitHub Contributors](https://img.shields.io/github/contributors/JoshuaMarden/energy_monitor)  [![Maintainability](https://api.codeclimate.com/v1/badges/2b5506b2c460c017238e/maintainability)](https://codeclimate.com/github/JoshuaMarden/energy_monitor/maintainability)
 
+<<<<<<< HEAD
 
-
-
+=======
+>>>>>>> 2ef578a50cbaf9da63e371274e20bc874d8f0a27
 ## Installation
 [Clone the repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) from github.
 
 In terminal, navigate to the root directory of the repository `energy_monitor`.
 Run the following commands:
--`python3 -m venv .venv`
--`bash setup.sh` ! we might want a simple setup script !
--`source .venv/bin/activate`
--`pip3 install requirements.txt`
+- `python3 -m venv .venv`
+- `bash setup.sh` ! we might want a simple setup script !
+- `source .venv/bin/activate`
+- `pip3 install requirements.txt`
 
 Once you have done this, you should be able to run Energy Monitor by running `python3 run.py` from within the repository. No need to run the other steps again.
 
@@ -86,7 +82,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+## Testing Coverage Visualised
 
-
-
-
+![Coverage Sunburst](https://codecov.io/github/JoshuaMarden/energy_monitor/graphs/sunburst.svg?token=5CLXJXIEE8)

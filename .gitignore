@@ -17,6 +17,7 @@ __pycache__/
 **/__pycache__/
 *.loc
 *.pytest_cache
+*.DS_Store
 
 # Terraform
 *.tfstate
