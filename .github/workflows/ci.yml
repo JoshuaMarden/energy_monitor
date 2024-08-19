@@ -1,3 +1,5 @@
+name: CI
+
 on: [push, pull_request]
 
 jobs:
@@ -21,13 +23,12 @@ jobs:
         pip install --upgrade pip  # Upgrade pip within the virtual environment
         pip install -r requirements.txt  # Install dependencies from requirements.txt
 
-    - name: Run tests with coverage
+    - name: Set up environment
       run: |
         source venv/bin/activate  # Ensure the virtual environment is active
-        pytest --cov=. --cov-report=xml  # Generate coverage report in XML format
+        source ./add_root_to_path.sh  # Run the script to modify PYTHONPATH
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        files: coverage.xml  # Path to your coverage report
-        token: ${{ secrets.CODECOV_TOKEN }}  # Set this in your repository secrets
+    - name: Run tests
+      run: |
+        source venv/bin/activate  # Ensure the virtual environment is active
+        pytest  # Run tests directly with pytest
