@@ -15,8 +15,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt  # Install dependencies from requirements.txt
-        pip install -e .  # Install the package using setup.py, which reads from requirements.txt if set up
+        pip install --no-use-pep517 -r requirements.txt  # Install dependencies from requirements.txt without using PEP 517
+        pip install --no-use-pep517 -e .  # Install the package in editable mode using setup.py, avoiding PEP 517
 
     - name: Set up environment
       run: |
