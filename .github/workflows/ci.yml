@@ -1,3 +1,5 @@
+name: CI
+
 on: [push, pull_request]
 
 jobs:
@@ -30,7 +32,7 @@ jobs:
     - name: Run tests with coverage
       run: |
         source venv/bin/activate  # Ensure the virtual environment is active
-        pytest --cov=your_package --cov-report=xml  # Generate coverage report
+        pytest --cov=src --cov-report=xml tests/test_*.py  # Adjust 'src' to your source code directory
 
     - name: Upload coverage to CodeClimate
       env:
