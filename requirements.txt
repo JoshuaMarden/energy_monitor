@@ -26,7 +26,6 @@ defusedxml==0.7.1
 dill==0.3.8
 distlib==0.3.8
 dulwich==0.21.7
--e git+https://github.com/JoshuaMarden/energy_monitor.git@9f6ce0e14b99ed84f9ab9c985546cb30dad965ce#egg=energy_monitor
 executing==2.0.1
 fastjsonschema==2.20.0
 filelock==3.15.4

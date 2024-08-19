@@ -4,10 +4,11 @@ import timeit
 from pipeline.extract_generation import main as extract_generation
 from extract_demand import main as extract_demand
 from extract_price import main as extract_price
-from extract_carbon import main as extract_carbon
 
+from constants import Constants as ct
 import config as cg
-save_directory = cg.DATA
+
+save_directory = ct.DATA
 if not os.path.exists(save_directory):
     os.makedirs(save_directory)
 
