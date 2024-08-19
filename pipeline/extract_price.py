@@ -52,7 +52,7 @@ class APIClient:
         df = pd.read_feather(path_to_reference_data)
         periods = df.groupby('settlementDate')['settlementPeriod'].unique().to_dict()
         periods = {k: list(v) for k, v in periods.items()}
-        logger.info(f"Getting price data for {periods}")
+        logger.info("Getting price data for %s", periods)
         return periods
 
     def construct_default_params(self, date: str, period: int) -> str:
@@ -76,8 +76,8 @@ class APIClient:
                     response.raise_for_status()  
                     response_list.append(response.json())  
                 except requests.exceptions.RequestException as e:
-                    self.logger.warning(f"An error occurred when requesting fuel data for {date}, period {period}!")
-                    self.logger.warning(f"{e}")
+                    self.logger.warning("An error occurred when requesting fuel data for %s, period %d!", date, period)
+                    self.logger.warning("%s", e)
             
         return response_list
 
@@ -110,7 +110,6 @@ class CustomDataProcessor(DataProcessor):
         """
         Takes a list of responses, merges them into a DataFrame, and returns it.
         """
-        logger = logger or self.logger
         
         if not response_list:
             logger.warning("No data found in response.")
@@ -153,7 +152,7 @@ class Main:
     
         try:
             periods = self.api_client.get_settlement_periods(self.reference_data_path)
-            self.logger.info(f"Retrieved settlement periods: {periods}")
+            self.logger.info("Retrieved settlement periods: %s", periods)
 
             response_list = self.api_client.fetch_data(periods)
             if response_list:
@@ -163,17 +162,14 @@ class Main:
                 if result is not None:
                     df, number_of_settlement_periods = result
 
-                    self.logger.debug("DataFrame of Price Data:")
-                    self.logger.debug(df.to_string())  # Log the entire DataFrame as a string
-                    self.logger.info("Head of the DataFrame:")
-                    self.logger.info("\n" + df.head().to_string())
-                    self.logger.info("Number of Settlement Periods:")
-                    self.logger.info(number_of_settlement_periods)
+                    self.logger.debug("DataFrame of Price Data:\n%s", df.to_string())
+                    self.logger.info("Head of the DataFrame:\n%s", df.head().to_string())
+                    self.logger.info("Number of Settlement Periods: %d", number_of_settlement_periods)
 
                     # Saving data locally
                     self.logger.info("Saving data locally.")
                     local_save_path = self.data_processor.save_data_locally(df)
-                    self.logger.info(f"Data successfully saved locally at {local_save_path}.")
+                    self.logger.info("Data successfully saved locally at %s.", local_save_path)
 
                     # Uploading data to S3
                     self.logger.info("Preparing to upload data to S3.")
@@ -182,7 +178,7 @@ class Main:
                     if s3_client:
                         self.logger.info("S3 client initialized successfully.")
                         self.data_processor.save_data_to_s3()
-                        self.logger.info(f"Data successfully uploaded to S3 at `{self.data_processor.s3_file_name}`.")
+                        self.logger.info("Data successfully uploaded to S3 at `%s`.", self.data_processor.s3_file_name)
                     else:
                         self.logger.error("Failed to initialize S3 client.")
 
@@ -192,7 +188,7 @@ class Main:
             else:
                 self.logger.error("Failed to retrieve data from the API.")
         except Exception as e:
-            self.logger.error(f"An error occurred during the execution: {e}")
+            self.logger.error("An error occurred during the execution: %s", e)
         
         self.logger.info("Execution of the workflow completed.")
         return None
@@ -225,7 +221,6 @@ def main() -> None:
     logger.info("---> Operation completed. Stopping performance monitor.")
     cg.stop_monitor(script_name, profiler, performance_logger)
     logger.info("---> Data inserted and process completed for %s.", script_name)
-
 
 
 if __name__ == "__main__":
