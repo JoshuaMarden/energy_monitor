@@ -9,11 +9,7 @@ setup(
     description='Project description here',
     author='Joshua',
     packages=find_packages(),
-    install_requires=[
-        'pandas>=1.5',
-        'pytest>=7.0',
-        # Add other dependencies here
-    ],
+    install_requires=[],
     entry_points={
         'console_scripts': [
             # Define any command-line scripts here if needed
