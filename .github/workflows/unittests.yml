@@ -1,0 +1,39 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  run-tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Create and activate virtual environment
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+
+    - name: Install dependencies
+      run: |
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Set up environment
+      run: |
+        source venv/bin/activate
+        export PYTHONPATH="$PYTHONPATH:$(pwd)"
+        source ./add_root_to_path.sh
+
+    - name: Run tests without coverage
+      run: |
+        source venv/bin/activate
+        export PYTHONPATH="$PYTHONPATH:$(pwd)"
+        pytest

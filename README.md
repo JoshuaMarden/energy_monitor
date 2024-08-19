@@ -10,7 +10,7 @@
 
 ## Badges
 
-[![CI](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/ci.yml)
+[![Unittests](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/unittests.yml/badge.svg)](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/unittests.yml)
  
 [![codecov](https://codecov.io/gh/JoshuaMarden/energy_monitor/branch/main/graph/badge.svg)](https://codecov.io/gh/JoshuaMarden/energy_monitor)
  
