@@ -28,11 +28,14 @@ jobs:
       run: |
         source .venv/bin/activate  # Ensure the virtual environment is active
         source ./add_root_to_path.sh  # Run the script to modify PYTHONPATH
+        echo $PYTHONPATH  # Debugging: Check if PYTHONPATH is correctly set
 
     - name: Run tests with coverage
+      env:
+        PYTHONPATH: ${{ github.workspace }}  # Set PYTHONPATH to the project root
       run: |
         source .venv/bin/activate  # Ensure the virtual environment is active
-        pytest --cov=. --cov-report=xml tests/test_*.py  # Run tests and measure coverage for all Python files in the repo
+        pytest --cov=. --cov-report=xml tests/  # Run tests in the `tests` directory
 
     - name: Upload coverage to CodeClimate
       env:
