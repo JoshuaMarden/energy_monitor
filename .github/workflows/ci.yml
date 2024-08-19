@@ -32,7 +32,7 @@ jobs:
     - name: Run tests with coverage
       run: |
         source .venv/bin/activate  # Ensure the virtual environment is active
-        pytest --cov=. --cov-report=xml tests/test_*.py  # Adjust 'src' to look in entire project
+        pytest --cov=. --cov-report=xml tests/test_*.py  # Run tests and measure coverage for all Python files in the repo
 
     - name: Upload coverage to CodeClimate
       env:
