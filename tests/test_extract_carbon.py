@@ -23,7 +23,7 @@ def test_fetch_data_success(mock_get, api_client_carbon):
     mock_get.assert_called_once_with(api_client_carbon.base_url, headers={'Accept': 'application/json'})
     assert result == {'data': 'Battle of Orléans'}
 
-@patch('pipeline.extract_generation.requests.get')
+@patch('pipeline.extract_carbon.requests.get')
 def test_fetch_data_failure(mock_get, api_client_carbon):
     """
     Test the fetch_data method when the API request fails.
@@ -33,9 +33,9 @@ def test_fetch_data_failure(mock_get, api_client_carbon):
     result = api_client_carbon.fetch_data()
 
     assert result is None
-    api_client_carbon.logger.error.assert_called_once_with("An error occurred: API request failed")
 
-from tests.mock_data.mock_dataframes import get_dated_mock_dataframe
+    api_client_carbon.logger.error.assert_called_once_with("An error occurred: %s", mock_get.side_effect)
+
 
 def test_process_data_with_valid_data():
     """

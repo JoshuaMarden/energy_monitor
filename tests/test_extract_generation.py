@@ -88,7 +88,7 @@ def test_fetch_data_failure(mock_get, api_client_generation):
 
     assert result is None
 
-    api_client_generation.logger.error.assert_called_once_with("An error occurred: API request failed")
+    api_client_generation.logger.error.assert_called_once_with("An error occurred: %s", mock_get.side_effect)
 
 def test_process_data_with_valid_data():
     """
