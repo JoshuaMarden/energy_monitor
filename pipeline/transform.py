@@ -98,26 +98,33 @@ class Transform:
                 formatted_data = self.carbon_transform(df)
                 data['carbon'] = formatted_data
                 self.logger.info("""Transformed carbon data""")
+
+        data = self.difference_of_periods(data)
+
+        data = self.difference_of_dates(data)
+        self.delete_read_files(files)
+        return data
+
+    def difference_of_dates(self, data_conflict):
+        diff = list(set(self.time_g) - set(self.time_d))
+        for time in diff:
+            for values in data_conflict['generation']:
+                if values[0] == time:
+                    data_conflict['demand'].append((values[0], 0))
+                    break
+        return data_conflict
+
+    def difference_of_periods(self, data_conflict):
         diff = list(set(self.period_g) - set(self.period_c))
         for period in diff:
-            for values in data['generation']:
+            for values in data_conflict['generation']:
 
                 if values[5] == period:
                     if period == 2:
                         yesterday = datetime.date.today() - datetime.timedelta(days=1)
-                        data['cost'].append((yesterday, 2, 0, 0))
-                    data['cost'].append((values[1], values[5], 0, 0))
+                        data_conflict['cost'].append((yesterday, 2, 0, 0))
+                    data_conflict['cost'].append((values[1], values[5], 0, 0))
                     break
-
-        diff = list(set(self.time_g) - set(self.time_d))
-        for time in diff:
-            for values in data['generation']:
-                if values[0] == time:
-                    data['demand'].append((values[0], 0))
-                    break
-
-        self.delete_read_files(files)
-        return data
 
     def generation_transform(self, df: pd.DataFrame) -> tuple:
         """
@@ -157,7 +164,6 @@ class Transform:
         if 1 in self.period_c:
             yesterday = datetime.date.today() - datetime.timedelta(days=1)
             df.loc[len(df.index)] = [str(yesterday), 1, 0, 0]
-        print(df)
         return list(df.itertuples(index=False, name=None))
 
     def carbon_transform(self, df: pd.DataFrame) -> tuple:
@@ -254,4 +260,4 @@ if __name__ == "__main__":
     tf = Transform()
     values = tf.get_data()
     load = Load()
-    load.load_values(db_conn.get_connection(), values)
+    # load.load_values(db_conn.get_connection(), values)
