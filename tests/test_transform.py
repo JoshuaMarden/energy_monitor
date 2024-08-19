@@ -11,6 +11,7 @@ transform = Transform()
 class TestTransform:
     def test_generation_transform_general(self, mock_gen_df):
         trans_df = transform.generation_transform(mock_gen_df)
+        assert isinstance(trans_df, list)
         for row in trans_df:
             assert len(row) == 6
             assert row[1] in row[0]
@@ -34,6 +35,7 @@ class TestTransform:
 
     def test_demand_transform_general(self, mock_demand_df):
         trans_df = transform.demand_transform(mock_demand_df)
+        assert isinstance(trans_df, list)
         for row in trans_df:
             assert len(row) == 2
             time = datetime.datetime.strptime(row[0], "%Y-%m-%dT%H:%M:%SZ")
@@ -42,6 +44,7 @@ class TestTransform:
 
     def test_cost_transform_general(self, mock_cost_df):
         trans_df = transform.cost_transform(mock_cost_df)
+        assert isinstance(trans_df, list)
         for row in trans_df:
             assert len(row) == 4
             date = datetime.datetime.strptime(row[0], "%Y-%m-%d")
@@ -51,8 +54,8 @@ class TestTransform:
             assert isinstance(row[3], int) == True
 
     def test_carbon_transform_general(self, mock_carbon_df):
-
         trans_df = transform.carbon_transform(mock_carbon_df)
+        assert isinstance(trans_df, list)
         for row in trans_df:
             assert len(row) == 3
             time = datetime.datetime.strptime(row[0], "%Y-%m-%dT%H:%MZ")
@@ -61,7 +64,7 @@ class TestTransform:
             assert row[2] in ["very low", "low",
                               "moderate", "high", "very high"]
 
-    def test_carbon_transform_general(self, mock_carbon_df):
+    def test_carbon_transform_adjust_carbon_levels(self, mock_carbon_df):
         assert mock_carbon_df['carbon level'][2] == 'low'
         assert mock_carbon_df['carbon level'][2] == 'low'
         assert mock_carbon_df['carbon level'][2] == 'low'
@@ -79,6 +82,7 @@ class TestTransform:
         gen_tuple = transform.generation_transform(mock_gen_df)
         data = {'generation': gen_tuple, 'demand': demand_tuple}
         data = transform.difference_of_dates(data)
+        assert isinstance(data, dict)
         times = []
         for values in data['demand']:
             times.append(values[0])
