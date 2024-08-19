@@ -18,7 +18,6 @@
 ![GitHub Last Commit](https://img.shields.io/github/last-commit/JoshuaMarden/energy_monitor)
 ![GitHub Contributors](https://img.shields.io/github/contributors/JoshuaMarden/energy_monitor)
 [![Maintainability](https://api.codeclimate.com/v1/badges/2b5506b2c460c017238e/maintainability)](https://codeclimate.com/github/JoshuaMarden/energy_monitor/maintainability)
-[![codecov](https://codecov.io/gh/username/repository/branch/main/graph/badge.svg?token=TOKEN)](https://codecov.io/gh/username/repository)
 
 
 
@@ -28,10 +27,10 @@
 
 In terminal, navigate to the root directory of the repository `energy_monitor`.
 Run the following commands:
--`python3 -m venv .venv`
--`bash setup.sh` ! we might want a simple setup script !
--`source .venv/bin/activate`
--`pip3 install requirements.txt`
+- `python3 -m venv .venv`
+- `bash setup.sh` ! we might want a simple setup script !
+- `source .venv/bin/activate`
+- `pip3 install requirements.txt`
 
 Once you have done this, you should be able to run Energy Monitor by running `python3 run.py` from within the repository. No need to run the other steps again.
 
