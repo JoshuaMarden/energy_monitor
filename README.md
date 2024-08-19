@@ -47,7 +47,13 @@ If you are having trouble using our app please open a ticket we'll get back to y
 
 If people have pushed to this repo, they are authors!
 
-## License
+
+## License
+
+[Elexon License](https://www.elexon.co.uk/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/) requires the following statement: 
+
+Contains BMRS data © Exelon Limited copyright and database right 2024.
+
 
 MIT License
 
