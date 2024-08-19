@@ -15,5 +15,5 @@ setup(
             # Define any command-line scripts here if needed
         ],
     },
-    python_requires='>=3.8',
+    python_requires='>=3.12',
 )
