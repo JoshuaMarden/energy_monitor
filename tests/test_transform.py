@@ -9,6 +9,10 @@ transform = Transform()
 
 
 class TestTransform:
+    """
+    This is the class that tests fucntions in the Transform class
+    """
+
     def test_generation_transform_general(self, mock_gen_df):
         trans_df = transform.generation_transform(mock_gen_df)
         assert isinstance(trans_df, list)

@@ -105,7 +105,13 @@ class Transform:
         self.delete_read_files(files)
         return data
 
-    def difference_of_dates(self, data_conflict):
+    def difference_of_dates(self, data_conflict: dict):
+        """
+        Works out the difference of dates between the time column of generation
+        and the time column of demand, adds the missing dates to demand and
+        returns it
+        Mainly to fix foreign key errors
+        """
         diff = list(set(self.time_g) - set(self.time_d))
         for time in diff:
             for values in data_conflict['generation']:
@@ -114,7 +120,13 @@ class Transform:
                     break
         return data_conflict
 
-    def difference_of_periods(self, data_conflict):
+    def difference_of_periods(self, data_conflict: dict):
+        """
+        Works out the difference of settlement periods between the settlement period column of generation
+        and the settlement period column of cost, adds the missing dates to cost and
+        returns it
+        Mainly to fix foreign key errors
+        """
         diff = list(set(self.period_g) - set(self.period_c))
         for period in diff:
             for values in data_conflict['generation']:
@@ -260,4 +272,4 @@ if __name__ == "__main__":
     tf = Transform()
     values = tf.get_data()
     load = Load()
-    # load.load_values(db_conn.get_connection(), values)
+    load.load_values(db_conn.get_connection(), values)
