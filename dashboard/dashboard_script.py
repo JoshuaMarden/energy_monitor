@@ -42,27 +42,27 @@ class DataLoader:
         if conn:
             conn.close()
             return gen_df, demand_df, cost_df, carbon_df
-        print("Error")
+        raise ConnectionError("Failed to connect to Database")
 
 
 class dashboard:
     def __init__(self) -> None:
         pass
 
-    def carbon_plots(self, carbon_df: pd.DataFrame):
+    def carbon_plots(self, carbon_df: pd.DataFrame) -> alt.Chart:
         carbon_bar_chart = alt.Chart(carbon_df).mark_bar().encode(alt.X('publish_time:T', title='Time'),
                                                                   y=alt.Y('forecast:Q', title='Carbon Intensity'), color='carbon_level').properties(width=650, height=400)
         return carbon_bar_chart
 
-    def time_of_lowest_carbon(self, carbon_df):
+    def time_of_lowest_carbon(self, carbon_df: pd.DataFrame):
         return carbon_df.loc[carbon_df["forecast"] == min(
             carbon_df["forecast"].values), "publish_time"].dt.time.iloc[0]
 
-    def time_of_highest_carbon(self, carbon_df):
+    def time_of_highest_carbon(self, carbon_df: pd.DataFrame):
         return carbon_df.loc[carbon_df["forecast"] == max(
             carbon_df["forecast"].values), "publish_time"].dt.time.iloc[0]
 
-    def generation_fuel_type(self, gen_df):
+    def generation_fuel_type(self, gen_df: pd.DataFrame) -> alt.Chart:
         fuel_types = ["BIOMASS", "CCGT", "COAL", "NPSHYD",
                       "NUCLEAR", "OCGT", "OIL", "OTHER", "PS", "WIND"]
         df_fuel_types = gen_df[gen_df['fuel_type'].isin(
@@ -72,7 +72,7 @@ class dashboard:
             x=alt.X('publish_time:T', title='Time'), y=alt.Y('generated:Q', title='Energy Generated MW'),
             color="fuel_type").properties(width=1000, height=1000)
 
-    def intensity_factors_df(self):
+    def intensity_factors_df(self) -> alt.Chart:
         intensity_factors = {'Energy Source': ['Biomass', 'Coal', 'Dutch Imports', 'French Imports', 'Gas (Combined Cycle)', 'Gas (Open Cycle)',
                                                'Hydro', 'Irish Imports', 'Nuclear', 'Oil', 'Other', 'Pumped Storage', 'Solar', 'Wind'],
                              'Intensity (gCO₂/kWh)': [120, 937, 474, 53, 394, 651, 0, 458, 0, 935, 300, 0, 0, 0],
@@ -94,7 +94,7 @@ class dashboard:
 
         return pd.DataFrame(intensity_factors)
 
-    def generation_interconnection(self, gen_df):
+    def generation_interconnection(self, gen_df: pd.DataFrame) -> alt.Chart:
         interconnector_mapping = {
             "INTELEC": "England(INTELEC)",
             "INTEW": "Wales(INTEW)",
@@ -118,7 +118,7 @@ class dashboard:
 
         return alt.Chart(df_interconnectors[["publish_time", "generated", "country"]]).mark_line().encode(x=alt.X('publish_time:T', title='Time'), y=alt.Y('generated:Q', title='Energy Generated MW'), color="country").properties(width=1400, height=1000)
 
-    def generate_dashboard(self, gen_df, demand_df, cost_df, carbon_df):
+    def generate_dashboard(self, gen_df: pd.DataFrame, demand_df: pd.DataFrame, cost_df: pd.DataFrame, carbon_df: pd.DataFrame):
         st.set_page_config(layout="wide")
         st.title("Energy Monitor")
         with st.container():
