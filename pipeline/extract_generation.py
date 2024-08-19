@@ -171,7 +171,7 @@ class Main:
                     self.logger.info("Saving data locally.")
                     local_save_path = self.data_processor.save_data_locally(df)
                     self.logger.info(f"Data successfully saved locally at {
-                                     local_save_path}.")
+                                    local_save_path}.")
 
                     # Uploading data to S3
                     self.logger.info("Preparing to upload data to S3.")
@@ -191,7 +191,7 @@ class Main:
             else:
                 self.logger.error("Failed to retrieve data from API.")
         except Exception as e:
-            self.logger.error(f"An error occurred during the execution: {e}")
+            self.logger.error(f"An error occurred during the execution: %s", e)
 
         self.logger.info("Execution of the workflow completed.")
         return None

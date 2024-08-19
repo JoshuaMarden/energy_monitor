@@ -10,6 +10,7 @@ data/*
 *.feather
 *.log
 
+
 # Python Module Data
 #(e.g __pychache__ directories)
 __pycache__/
