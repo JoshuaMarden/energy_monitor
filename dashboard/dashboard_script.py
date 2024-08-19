@@ -50,9 +50,8 @@ class dashboard:
         pass
 
     def carbon_plots(self, carbon_df: pd.DataFrame) -> alt.Chart:
-        carbon_bar_chart = alt.Chart(carbon_df).mark_bar().encode(alt.X('publish_time:T', title='Time'),
-                                                                  y=alt.Y('forecast:Q', title='Carbon Intensity'), color='carbon_level').properties(width=650, height=400)
-        return carbon_bar_chart
+        return alt.Chart(carbon_df).mark_bar().encode(alt.X('publish_time:T', title='Time'),
+                                                      y=alt.Y('forecast:Q', title='Carbon Intensity'), color='carbon_level').properties(width=650, height=400)
 
     def time_of_lowest_carbon(self, carbon_df: pd.DataFrame):
         return carbon_df.loc[carbon_df["forecast"] == min(
