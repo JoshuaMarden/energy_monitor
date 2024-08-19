@@ -9,7 +9,19 @@
 ! We'll add some visuals here maybe, using [Asciinema](https://asciinema.org/) or using [ttygif](https://github.com/icholy/ttygif) and a recording. !
 
 ## Badges
-! Are we doing badges? !
+
+[![CI](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/JoshuaMarden/energy_monitor/branch/main/graph/badge.svg)](https://codecov.io/gh/JoshuaMarden/energy_monitor)
+![Python Versions](https://img.shields.io/pypi/pyversions/energy_monitor.svg)
+![License](https://img.shields.io/github/license/JoshuaMarden/energy_monitor)
+![GitHub Stars](https://img.shields.io/github/stars/JoshuaMarden/energy_monitor.svg?style=social&label=Star)
+![GitHub Last Commit](https://img.shields.io/github/last-commit/JoshuaMarden/energy_monitor)
+![GitHub Contributors](https://img.shields.io/github/contributors/JoshuaMarden/energy_monitor)
+[![Maintainability](https://api.codeclimate.com/v1/badges/2b5506b2c460c017238e/maintainability)](https://codeclimate.com/github/JoshuaMarden/energy_monitor/maintainability)
+[![Requirements Status](https://requires.io/github/JoshuaMarden/energy_monitor/requirements.svg?branch=main)](https://requires.io/github/JoshuaMarden/energy_monitor/requirements/?branch=main)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/2b5506b2c460c017238e/test_coverage)](https://codeclimate.com/github/JoshuaMarden/energy_monitor/test_coverage)
+
+
 
 ## Installation
 [Clone the repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) from github.
@@ -47,11 +59,17 @@ If you are having trouble using our app please open a ticket we'll get back to y
 
 If people have pushed to this repo, they are authors!
 
-## License
+
+## License
+
+[Elexon License](https://www.elexon.co.uk/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/) requires the following statement: 
+
+Contains BMRS data © Exelon Limited copyright and database right 2024.
+
 
 MIT License
 
-Copyright (c) [year] [fullname]
+Copyright (c) 2024 J J Marden
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

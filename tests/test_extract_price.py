@@ -4,7 +4,7 @@ Test script for extract_demand.py
 import pandas as pd
 import numpy as np
 from unittest.mock import patch, MagicMock, call
-from tests.mock_data.mock_dataframes import get_dated_mock_dataframe
+from mock_data.mock_dataframes import get_dated_mock_dataframe
 from pipeline.extract_demand import CustomDataProcessor
 
 

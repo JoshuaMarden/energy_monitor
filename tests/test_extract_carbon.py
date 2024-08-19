@@ -5,7 +5,6 @@ import pandas as pd
 from pipeline.extract_carbon import CustomDataProcessor
 from unittest.mock import patch, MagicMock
 from requests.exceptions import RequestException
-from tests.mock_data.mock_dataframes import get_dated_mock_dataframe
 
 
 @patch('pipeline.extract_carbon.requests.get')
@@ -26,7 +25,7 @@ def test_fetch_data_success(mock_get, api_client_carbon):
     assert result == {'data': 'Battle of Orléans'}
 
 
-@patch('pipeline.extract_generation.requests.get')
+@patch('pipeline.extract_carbon.requests.get')
 def test_fetch_data_failure(mock_get, api_client_carbon):
     """
     Test the fetch_data method when the API request fails.
@@ -36,9 +35,8 @@ def test_fetch_data_failure(mock_get, api_client_carbon):
     result = api_client_carbon.fetch_data()
 
     assert result is None
-    api_client_carbon.logger.error.assert_called_once_with(
-        "An error occurred: API request failed")
 
+    api_client_carbon.logger.error.assert_called_once_with("An error occurred: %s", mock_get.side_effect)
 
 def test_process_data_with_valid_data():
     """

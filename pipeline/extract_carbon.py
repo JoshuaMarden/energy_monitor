@@ -52,7 +52,7 @@ class APIClient:
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            self.logger.error(f"An error occurred: {e}")
+            self.logger.error("An error occurred: %s", e)
             return None
 
 
@@ -135,19 +135,18 @@ class Main:
         
         if data:
             self.logger.info("Data fetched successfully from API.")
-            self.logger.debug(f"Fetched Data: {data}")
+            self.logger.debug("Fetched Data: %s", data)
 
             self.logger.info("Processing the fetched data.")
             df = self.data_processor.process_data(data)
             
             if df is not None:
                 self.logger.info("Data processed successfully into DataFrame.")
-                self.logger.debug("DataFrame of Carbon Forecast Data:")
-                self.logger.debug(df.to_string())
+                self.logger.debug("DataFrame of Carbon Forecast Data:\n%s", df.to_string())
 
                 self.logger.info("Saving the processed data locally.")
                 self.data_processor.save_data_locally(df)
-                self.logger.info(f"Data saved locally at `{self.data_processor.save_location}`.")
+                self.logger.info("Data saved locally at `%s`.", self.data_processor.save_location)
 
                 self.logger.info("Attempting to get S3 client.")
                 s3_client = self.data_processor.get_s3_client()
@@ -156,7 +155,8 @@ class Main:
                     self.logger.info("S3 client retrieved successfully.")
                     self.logger.info("Uploading the data to S3.")
                     self.data_processor.save_data_to_s3()
-                    self.logger.info(f"Data successfully uploaded to S3 bucket `{self.s3_bucket}` as `{self.s3_file_name}`.")
+                    self.logger.info("Data successfully uploaded to S3 bucket `%s` as `%s`.",
+                                     self.s3_bucket, self.s3_file_name)
                 else:
                     self.logger.error("Failed to get S3 client. Data was not uploaded to S3.")
                 return df
