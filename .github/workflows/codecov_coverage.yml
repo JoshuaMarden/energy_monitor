@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   run-tests-and-coverage:
-    name: Run Tests and Generate Coverage Report
+    name: Run Tests and Generate Coverage Report For CodeCov
     runs-on: ubuntu-latest
 
     steps:
@@ -19,6 +19,8 @@ jobs:
       run: |
         python -m venv venv
         source venv/bin/activate
+        export PYTHONPATH="$PYTHONPATH:$(pwd)"
+        source ./add_root_to_path.sh
 
     - name: Install dependencies for Pytest-Cov
       run: |

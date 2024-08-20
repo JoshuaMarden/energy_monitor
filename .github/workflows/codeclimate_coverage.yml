@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   upload-code-climate-coverage:
-    name: Generate and Upload Coverage Report for Code Climate
+    name: Generate and Upload Coverage Report for CodeClimate
     runs-on: ubuntu-latest
 
     steps:
@@ -19,6 +19,8 @@ jobs:
       run: |
         python -m venv venv
         source venv/bin/activate
+        export PYTHONPATH="$PYTHONPATH:$(pwd)"
+        source ./add_root_to_path.sh
 
     - name: Install dependencies for Code Climate
       run: |
