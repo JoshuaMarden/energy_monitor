@@ -24,15 +24,9 @@ jobs:
       run: |
         source venv/bin/activate
         pip install --upgrade pip
-        pip install coverage==4.4
-        pip install codeclimate-test-reporter
-        pip install -r requirements.txt  # Install other dependencies
-
-    - name: Set up environment
-      run: |
-        source venv/bin/activate
-        export PYTHONPATH="$PYTHONPATH:$(pwd)"
-        source ./add_root_to_path.sh
+        pip install coverage==4.4  # Install the version of coverage compatible with codeclimate-test-reporter
+        pip install codeclimate-test-reporter  # Install codeclimate-test-reporter
+        pip install -r requirements.txt  # Install other dependencies, excluding pytest-cov
 
     - name: Generate Coverage Report
       run: |
