@@ -33,6 +33,7 @@ jobs:
     - name: Generate Coverage Report
       run: |
         source venv/bin/activate
+        pip install pytest-cov
         pytest --cov=./ --cov-report=xml:coverage.xml  # Generate coverage.xml
 
     - name: Report to Code Climate
