@@ -1,6 +1,6 @@
 # Pushes to Cloud but only if the tests pass!
 
-name: Build & Push
+name: Deploy to Cloud
 
 on: [push, pull_request]
 
