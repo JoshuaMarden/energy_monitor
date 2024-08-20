@@ -22,32 +22,31 @@ jobs:
         export PYTHONPATH="$PYTHONPATH:$(pwd)"
         source ./add_root_to_path.sh
 
-    - name: Install dependencies for Code Climate
+    - name: Install dependencies
       run: |
         source venv/bin/activate
         pip install --upgrade pip
-        pip install coverage==4.4  # Install the version of coverage compatible with codeclimate-test-reporter
-        pip install codeclimate-test-reporter  # Install codeclimate-test-reporter
-        pip install -r requirements.txt  # Install other dependencies, excluding pytest-cov
+        pip install pytest-cov  # Install pytest-cov which uses a newer version of coverage.py
+        pip install -r requirements.txt  # Install other dependencies
 
-    - name: Generate Coverage Report
+    - name: Download Code Climate Reporter
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/latest/linux/cc-test-reporter -o ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+
+    - name: Prepare for Coverage Report
+      run: |
+        ./cc-test-reporter before-build
+
+    - name: Run tests and generate coverage report
       run: |
         source venv/bin/activate
-        pip install pytest-cov
-        pytest --cov=./ --cov-report=xml:coverage.xml  # Generate coverage.xml
+        pytest --cov=./ --cov-report=xml --cov-report=term
 
-    - name: Report to Code Climate
+    - name: Upload Coverage Report to Code Climate
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_TEST_REPORTER_ID }}
+        GIT_COMMIT_SHA: ${{ github.sha }}
+        GIT_BRANCH: ${{ github.ref_name }}
       run: |
-        source venv/bin/activate
-        codeclimate-test-reporter < coverage.xml
-
-    - name: Upload coverage to Codecov (optional, if you want to upload this report to Codecov as well)
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: coverage.xml
-        flags: codeclimate
-        name: code-coverage-report
-        fail_ci_if_error: true
+        ./cc-test-reporter after-build --exit-code $?
