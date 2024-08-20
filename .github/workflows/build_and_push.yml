@@ -32,8 +32,8 @@ jobs:
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
 
     - name: Navigate to infrastructure directory
-      run: cd infrastructure
-      run: ls
+      run: cd infrastructure; ls
+
 
     - name: Make build_and_push.sh executable
       run: chmod +x build_and_push.sh
