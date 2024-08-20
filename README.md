@@ -90,6 +90,13 @@ SOFTWARE.
 
 ## Testing Coverage Visualised
 
-![Coverage Sunburst](https://codecov.io/github/JoshuaMarden/energy_monitor/graphs/sunburst.svg?token=5CLXJXIEE8)
+<div align="center">
+
+![Coverage Sunburst](https://codecov.io/github/JoshuaMarden/energy_monitor/graphs/sunburst.svg?token=5CLXJXIEE8)<br>
+![Codecov Tree Map](https://codecov.io/github/JoshuaMarden/energy_monitor/graphs/tree.svg?token=5CLXJXIEE8)<br>
+![Codecov Icicle Chart](https://codecov.io/github/JoshuaMarden/energy_monitor/graphs/icicle.svg?token=5CLXJXIEE8)<br>
+
+
+</div>
 
 ![Coverage Over Time](https://codecov.io/gh/JoshuaMarden/energy_monitor/graphs/commits.svg?token=5CLXJXIEE8)
