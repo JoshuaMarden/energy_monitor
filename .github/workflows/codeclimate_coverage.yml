@@ -1,0 +1,52 @@
+name: Code Climate Coverage
+
+on: [push, pull_request]
+
+jobs:
+  upload-code-climate-coverage:
+    name: Generate and Upload Coverage Report for CodeClimate
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Create and activate virtual environment
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        export PYTHONPATH="$PYTHONPATH:$(pwd)"
+        source ./add_root_to_path.sh
+
+    - name: Install dependencies
+      run: |
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install pytest-cov  # Install pytest-cov which uses a newer version of coverage.py
+        pip install -r requirements.txt  # Install other dependencies
+
+    - name: Download Code Climate Reporter
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 -o ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+
+    - name: Prepare for Coverage Report
+      run: |
+        ./cc-test-reporter before-build
+
+    - name: Run tests and generate coverage report
+      run: |
+        source venv/bin/activate
+        pytest --cov=./ --cov-report=xml --cov-report=term
+
+    - name: Upload Coverage Report to Code Climate
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        GIT_COMMIT_SHA: ${{ github.sha }}
+        GIT_BRANCH: ${{ github.ref_name }}
+      run: |
+        ./cc-test-reporter after-build --exit-code $?

@@ -10,7 +10,18 @@
 
 ## Badges
 
-[![Unittests](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/unittests.yml/badge.svg)](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/unittests.yml)  [![codecov](https://codecov.io/github/JoshuaMarden/energy_monitor/graph/badge.svg?token=5CLXJXIEE8)](https://codecov.io/github/JoshuaMarden/energy_monitor)  ![License](https://img.shields.io/github/license/JoshuaMarden/energy_monitor)  ![GitHub Stars](https://img.shields.io/github/stars/JoshuaMarden/energy_monitor.svg?style=social&label=Star)  ![GitHub Last Commit](https://img.shields.io/github/last-commit/JoshuaMarden/energy_monitor)  ![GitHub Contributors](https://img.shields.io/github/contributors/JoshuaMarden/energy_monitor)  [![Maintainability](https://api.codeclimate.com/v1/badges/2b5506b2c460c017238e/maintainability)](https://codeclimate.com/github/JoshuaMarden/energy_monitor/maintainability)
+<div align="center">
+
+[![Unittests](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/unittests.yml/badge.svg)](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/unittests.yml)  
+[![codecov](https://codecov.io/github/JoshuaMarden/energy_monitor/graph/badge.svg?token=5CLXJXIEE8)](https://codecov.io/github/JoshuaMarden/energy_monitor)  
+![License](https://img.shields.io/github/license/JoshuaMarden/energy_monitor)  
+![GitHub Stars](https://img.shields.io/github/stars/JoshuaMarden/energy_monitor.svg?style=social&label=Star)  
+![GitHub Last Commit](https://img.shields.io/github/last-commit/JoshuaMarden/energy_monitor)  
+![GitHub Contributors](https://img.shields.io/github/contributors/JoshuaMarden/energy_monitor)  
+[![Maintainability](https://api.codeclimate.com/v1/badges/2b5506b2c460c017238e/maintainability)](https://codeclimate.com/github/JoshuaMarden/energy_monitor/maintainability)  
+[![Test Coverage](https://api.codeclimate.com/v1/badges/2b5506b2c460c017238e/test_coverage)](https://codeclimate.com/github/JoshuaMarden/energy_monitor/test_coverage)
+
+</div>
 
 ## Installation
 [Clone the repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) from github.
