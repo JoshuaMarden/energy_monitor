@@ -21,7 +21,6 @@
 
 
 
-
 ## Installation
 [Clone the repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) from github.
 
@@ -30,6 +29,7 @@ Run the following commands:
 - `python3 -m venv .venv`
 - `bash setup.sh` ! we might want a simple setup script !
 - `source .venv/bin/activate`
+- `add_root_to_path.sh`
 - `pip3 install requirements.txt`
 
 Once you have done this, you should be able to run Energy Monitor by running `python3 run.py` from within the repository. No need to run the other steps again.
@@ -56,7 +56,7 @@ If you are having trouble using our app please open a ticket we'll get back to y
 
 ## Authors and Acknowledgment
 
-If people have pushed to this repo, they are authors!
+If people have pushed to this repo, they are authors.
 
 
 ## License
