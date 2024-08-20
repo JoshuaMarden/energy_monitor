@@ -21,6 +21,7 @@ charset-normalizer==3.3.2
 cleo==2.1.0
 codeclimate-test-reporter==0.2.3
 comm==0.2.2
+coverage==4.4
 crashtest==0.4.1
 debugpy==1.8.5
 decorator==5.1.1
