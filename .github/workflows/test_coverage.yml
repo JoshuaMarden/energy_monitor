@@ -17,8 +17,8 @@ jobs:
 
     - name: Create and activate virtual environment
       run: |
-        python -m venv venv  # Create a virtual environment
-        source venv/bin/activate  # Activate the virtual environment
+        python -m venv venv
+        source venv/bin/activate
 
     - name: Install dependencies
       run: |
@@ -51,6 +51,6 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}  
         files: coverage.xml  # Ensure this matches the actual location of coverage.xml
-        flags: unittests  # Optional flag to distinguish coverage reports
-        name: code-coverage-report  # Optional report name
-        fail_ci_if_error: true  # Fail the CI if the upload fails
+        flags: unittests  # (Optional) flag to distinguish coverage reports
+        name: code-coverage-report  # (Optional) report name
+        fail_ci_if_error: true
