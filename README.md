@@ -92,9 +92,9 @@ SOFTWARE.
 
 <div align="center">
 
-![Coverage Sunburst](https://codecov.io/github/JoshuaMarden/energy_monitor/graphs/sunburst.svg?token=5CLXJXIEE8)<br>
+![Coverage Sunburst](https://codecov.io/github/JoshuaMarden/energy_monitor/graphs/sunburst.svg?token=5CLXJXIEE8)
 ![Codecov Tree Map](https://codecov.io/github/JoshuaMarden/energy_monitor/graphs/tree.svg?token=5CLXJXIEE8)<br>
-![Codecov Icicle Chart](https://codecov.io/github/JoshuaMarden/energy_monitor/graphs/icicle.svg?token=5CLXJXIEE8)<br>
+![Codecov Icicle Chart](https://codecov.io/github/JoshuaMarden/energy_monitor/graphs/icicle.svg?token=5CLXJXIEE8)
 
 
 </div>
