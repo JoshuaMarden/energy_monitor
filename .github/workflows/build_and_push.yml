@@ -24,27 +24,23 @@ jobs:
 
     - name: Log in to AWS ECR
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}  # Use AWS_ACCESS_KEY
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}  # Use AWS_SECRET_KEY
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         ECR_URL: ${{ secrets.ECR_URL }}
       run: |
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
 
-    - name: Navigate to infrastructure directory
-      run: cd infrastructure; ls
-
-
-    - name: Make build_and_push.sh executable
-      run: chmod +x build_and_push.sh
-
-    - name: Run build_and_push.sh
+    - name: Make build_and_push.sh executable and run it
+      run: |
+        cd infrastructure
+        chmod +x build_and_push.sh
+        ./build_and_push.sh
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}  # Use AWS_ACCESS_KEY
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}  # Use AWS_SECRET_KEY
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         ECR_URL: ${{ secrets.ECR_URL }}
-      run: ./build_and_push.sh
 
     - name: Logout from AWS ECR
-      run: docker logout $ECR_URL
+      run: docker logout ${{ secrets.ECR_URL }}
