@@ -88,7 +88,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## Testing Coverage Visualised ([CodeCov]([View Full Codecov Dashboard](https://app.codecov.io/gh/JoshuaMarden/energy_monitor?token=5CLXJXIEE8)))
+## Testing Coverage Visualised ([CodeCov](https://app.codecov.io/gh/JoshuaMarden/energy_monitor?token=5CLXJXIEE8))
 
 <div align="center">
 
