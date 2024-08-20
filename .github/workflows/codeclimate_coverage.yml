@@ -1,10 +1,10 @@
-name: Pytest Coverage
+name: Code Climate Coverage
 
 on: [push, pull_request]
 
 jobs:
-  run-tests-and-coverage:
-    name: Run Tests and Generate Coverage Report
+  upload-code-climate-coverage:
+    name: Generate and Upload Coverage Report for Code Climate
     runs-on: ubuntu-latest
 
     steps:
@@ -20,23 +20,37 @@ jobs:
         python -m venv venv
         source venv/bin/activate
 
-    - name: Install dependencies for Pytest-Cov
+    - name: Install dependencies for Code Climate
       run: |
         source venv/bin/activate
         pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest-cov
+        pip install coverage==4.4
+        pip install codeclimate-test-reporter
+        pip install -r requirements.txt  # Install other dependencies
 
-    - name: Run tests with coverage
+    - name: Set up environment
+      run: |
+        source venv/bin/activate
+        export PYTHONPATH="$PYTHONPATH:$(pwd)"
+        source ./add_root_to_path.sh
+
+    - name: Generate Coverage Report
       run: |
         source venv/bin/activate
         pytest --cov=./ --cov-report=xml:coverage.xml  # Generate coverage.xml
 
-    - name: Upload coverage to Codecov
+    - name: Report to Code Climate
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_TEST_REPORTER_ID }}
+      run: |
+        source venv/bin/activate
+        codeclimate-test-reporter < coverage.xml
+
+    - name: Upload coverage to Codecov (optional, if you want to upload this report to Codecov as well)
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: coverage.xml
-        flags: pytest
-        name: pytest-coverage-report
+        flags: codeclimate
+        name: code-coverage-report
         fail_ci_if_error: true

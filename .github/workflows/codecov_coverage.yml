@@ -1,10 +1,10 @@
-name: Pytest Coverage
+name: Coverage
 
 on: [push, pull_request]
 
 jobs:
-  upload-pytest-coverage:
-    name: Generate and Upload Coverage Report for Pytest and Codecov
+  upload-coverage:
+    name: Generate and Upload Coverage Report
     runs-on: ubuntu-latest
 
     steps:
@@ -20,11 +20,12 @@ jobs:
         python -m venv venv
         source venv/bin/activate
 
-    - name: Install dependencies for Pytest-Cov
+    - name: Install dependencies
       run: |
         source venv/bin/activate
         pip install --upgrade pip
-        pip install -r requirements.txt  # Install all dependencies, including pytest-cov
+        pip install coverage==4.4  # Install a compatible version of coverage.py
+        pip install -r requirements.txt
 
     - name: Set up environment
       run: |
@@ -32,16 +33,24 @@ jobs:
         export PYTHONPATH="$PYTHONPATH:$(pwd)"
         source ./add_root_to_path.sh
 
-    - name: Generate Coverage Report
+    - name: Check Coverage & Generate Report
       run: |
         source venv/bin/activate
-        pytest --cov=./ --cov-report=xml:coverage.xml  # Generate coverage.xml
+        export PYTHONPATH="$PYTHONPATH:$(pwd)"
+        pytest --cov=./ --cov-report=xml:coverage.xml  # Generate coverage.xml in the current directory
+
+    - name: Report to Code Climate
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_TEST_REPORTER_ID }}
+      run: |
+        source venv/bin/activate
+        codeclimate-test-reporter < coverage.xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: coverage.xml
-        flags: pytest
-        name: pytest-coverage-report
+        token: ${{ secrets.CODECOV_TOKEN }}  
+        files: coverage.xml  # Ensure this matches the actual location of coverage.xml
+        flags: unittests  # (Optional) flag to distinguish coverage reports
+        name: code-coverage-report  # (Optional) report name
         fail_ci_if_error: true
