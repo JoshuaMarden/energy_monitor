@@ -12,7 +12,8 @@
 
 <div align="center">
 
-[![Tests Passed & Pushed to Cloud](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/test_build_push.yml/badge.svg)](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/test_build_push.yml) 
+[![Unittests](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/unittests.yml/badge.svg)](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/unittests.yml)  
+[![Pushed to Cloud](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/test_build_push.yml/badge.svg)](https://github.com/JoshuaMarden/energy_monitor/actions/workflows/test_build_push.yml) 
 [![codecov](https://codecov.io/github/JoshuaMarden/energy_monitor/graph/badge.svg?token=5CLXJXIEE8)](https://codecov.io/github/JoshuaMarden/energy_monitor)  
 ![License](https://img.shields.io/github/license/JoshuaMarden/energy_monitor)  
 ![GitHub Stars](https://img.shields.io/github/stars/JoshuaMarden/energy_monitor.svg?style=social&label=Star)  

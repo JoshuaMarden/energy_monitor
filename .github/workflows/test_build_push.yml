@@ -1,3 +1,5 @@
+# Pushes to Cloud but only if the tests pass!
+
 name: Test and Build
 
 on: [push, pull_request]
