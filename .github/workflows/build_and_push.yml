@@ -33,6 +33,7 @@ jobs:
 
     - name: Navigate to infrastructure directory
       run: cd infrastructure
+      run: ls
 
     - name: Make build_and_push.sh executable
       run: chmod +x build_and_push.sh
