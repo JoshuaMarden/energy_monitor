@@ -14,10 +14,18 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
+    - name: Verify Environment Variables
+      run: |
+        echo "AWS_REGION: ${{ secrets.AWS_REGION }}"
+        echo "ECR_URL: ${{ secrets.ECR_URL }}"
+      env:
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        ECR_URL: ${{ secrets.ECR_URL }}
+
     - name: Log in to AWS ECR
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}  # Use AWS_ACCESS_KEY
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}  # Use AWS_SECRET_KEY
         AWS_REGION: ${{ secrets.AWS_REGION }}
         ECR_URL: ${{ secrets.ECR_URL }}
       run: |
@@ -31,8 +39,8 @@ jobs:
 
     - name: Run build_and_push.sh
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}  # Use AWS_ACCESS_KEY
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}  # Use AWS_SECRET_KEY
         AWS_REGION: ${{ secrets.AWS_REGION }}
         ECR_URL: ${{ secrets.ECR_URL }}
       run: ./build_and_push.sh
