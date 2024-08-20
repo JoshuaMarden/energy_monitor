@@ -14,7 +14,9 @@ from psycopg2 import connect
 from psycopg2.extras import RealDictCursor, execute_values
 import datetime
 
+from pipeline.common import DataProcessor
 import config as cg
+from constants import Constants as ct
 
 load_dotenv()
 
@@ -23,39 +25,29 @@ LOGGING_LEVEL = logging.DEBUG
 logger = cg.setup_logging(SCRIPT_NAME, LOGGING_LEVEL)
 
 
-class S3bucket:
+class CustomDataProcessor(DataProcessor):
     """
-    downloads files in an S3 bucket
+    Custom DataProcessor that implements a specific process_data method.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, save_location: str,
+                 aws_access_key: str,
+                 aws_secret_key: str,
+                 region: str,
+                 s3_file_name: str,
+                 bucket: str,
+                 logger: logging.Logger = logger) -> None:
         """
-        Initialize class variables.
+        Initialize the CustomDataProcessor with the parent class constructor.
         """
-        self.logger = logger
-        self.bucket = "c12-energy-tracker"
-        self.public_key = os.environ.get("ACCESS_KEY")
-        self.secret_key = os.environ.get("SECRET_KEY")
-
-    def get_client(self) -> boto3.client:
-        """Connects to the S3 instance and returns it"""
-        s3 = boto3.client('s3',
-                          aws_access_key_id=self.public_key,
-                          aws_secret_access_key=self.secret_key)
-        return s3
-
-    def get_files_from_bucket(self):
-        """
-        Downloads All files in the s3 Bucket
-        """
-        client = self.get_client()
-        data = client.list_objects(Bucket=self.bucket)
-        for file in data['Contents']:
-
-            client.download_file(self.bucket, file['Key'], f'''{
-                                 file['Key']} {file['LastModified']}''')
-            self.logger.info(f"""Downloaded file: '{file['Key']} {
-                             file['LastModified']}'""")
+        # Call the parent class's __init__ method
+        super().__init__(save_location,
+                         aws_access_key,
+                         aws_secret_key,
+                         region,
+                         s3_file_name,
+                         bucket,
+                         logger)
 
 
 class Transform:
@@ -137,6 +129,7 @@ class Transform:
                         data_conflict['cost'].append((yesterday, 2, 0, 0))
                     data_conflict['cost'].append((values[1], values[5], 0, 0))
                     break
+        return data_conflict
 
     def generation_transform(self, df: pd.DataFrame) -> tuple:
         """
@@ -267,7 +260,14 @@ class Load:
 
 if __name__ == "__main__":
     db_conn = DatabaseConnection()
-    s3_bucket = S3bucket()
+    s3_bucket = DataProcessor(save_location="your_save_location",
+                              aws_access_key=os.getenv('AWS_ACCESS_KEY'),
+                              aws_secret_key=os.getenv('AWS_SECRET_KEY'),
+                              region=os.getenv('AWS_REGION'),
+                              s3_file_name="your_s3_file_name",
+                              bucket=ct.S3_BUCKET,
+                              logger=logger)
+    s3_bucket.get_s3_client()
     s3_bucket.get_files_from_bucket()
     tf = Transform()
     values = tf.get_data()
