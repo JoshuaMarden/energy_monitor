@@ -25,31 +25,6 @@ LOGGING_LEVEL = logging.DEBUG
 logger = cg.setup_logging(SCRIPT_NAME, LOGGING_LEVEL)
 
 
-class CustomDataProcessor(DataProcessor):
-    """
-    Custom DataProcessor that implements a specific process_data method.
-    """
-
-    def __init__(self, save_location: str,
-                 aws_access_key: str,
-                 aws_secret_key: str,
-                 region: str,
-                 s3_file_name: str,
-                 bucket: str,
-                 logger: logging.Logger = logger) -> None:
-        """
-        Initialize the CustomDataProcessor with the parent class constructor.
-        """
-        # Call the parent class's __init__ method
-        super().__init__(save_location,
-                         aws_access_key,
-                         aws_secret_key,
-                         region,
-                         s3_file_name,
-                         bucket,
-                         logger)
-
-
 class Transform:
     """
    turns all files into a pd.Dataframe with the correct format

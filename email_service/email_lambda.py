@@ -19,7 +19,7 @@ import config as cg
 from constants import Constants as ct
 
 
-class Transform:
+class GetUserData:
     ...
 
 
