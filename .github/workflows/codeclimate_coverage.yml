@@ -1,8 +1,8 @@
 name: CodeClimate Coverage
 
-# Runs the coverage report for CodeClimate and pushes it to
-# CodeClimate so that it can be visualised and badges can be
-# generated.
+# Runs the coverage report module for CodeClimate and pushes it to
+# CodeClimate website. It can then be visualised and badges can be
+# generated for README.md.
 
 on: [push, pull_request]
 
