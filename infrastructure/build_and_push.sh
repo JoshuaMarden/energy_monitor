@@ -1,16 +1,18 @@
-# Dockerises modules and pushes to AWS
+# Dockerises modules and pushes to AWS.
 
-# This ONLY runs if executed from INSIDE infrastructure/
+# This ONLY runs if executed from INSIDE infrastructure??
 
 # Docker can only see files in subdirectories. Therefore all the
 # files used are imported to a temporarily created 'build_context' dir.
 # Then the script logs into AWS, dockerises modules, pushes them to AWS ECRs.
-# This build directory is cleaned up at the end.
+# The build directory is cleaned up at the end.
 # Purely for my personal interest, the script also times itself.
 
 # Variables
 REGION="eu-west-2"
 ACCOUNT_ID="129033205317"
+CLUSTER_NAME="c12-ecs-cluster"
+SERVICE_NAME="c12-energy-dashboard"
 REPO_PREFIX="c12-energy"
 REPO_SUFFIX=("extract" "extract-carbon" "pipeline" "dashboard")
 IMAGE_NAMES=("extract_to_s3" "extract_carbon" "transform_load" "dashboard")
@@ -61,5 +63,8 @@ time (
 
     # Clean up the build directory.
     rm -rf $BUILD_DIR
+
+    # Restart the AWS service so that the new docker images are used
+    aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --force-new-deployment
 )
 # Will hopefully print execution time now.
