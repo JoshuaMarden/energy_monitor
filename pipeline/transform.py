@@ -113,24 +113,6 @@ class Transform:
                     break
         return data_conflict
 
-    # def difference_of_periods(self, data_conflict: dict):
-    #     """
-    #     Works out the difference of settlement periods between the settlement period column of generation
-    #     and the settlement period column of cost, adds the missing dates to cost and
-    #     returns it
-    #     Mainly to fix foreign key errors
-    #     """
-    #     diff = list(set(self.period_g) - set(self.period_c))
-    #     for period in diff:
-    #         for values in data_conflict['generation']:
-
-    #             if values[5] == period:
-    #                 if period == 2:
-    #                     yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    #                     data_conflict['cost'].append((yesterday, 2, 0, 0))
-    #                 data_conflict['cost'].append((values[1], values[5], 0, 0))
-    #                 break
-
     def generation_transform(self, df: pd.DataFrame) -> tuple:
         """
         Filters and transforms the generation dataframe passed into it and returns
