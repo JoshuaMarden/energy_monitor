@@ -144,3 +144,6 @@ websocket-client==1.8.0
 widgetsnbextension==4.0.11
 xattr==1.1.0
 yarg==0.1.9
+streamlit
+psycopg2
+altair

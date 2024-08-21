@@ -231,6 +231,8 @@ class Load:
             execute_values(curr, sql_query, data['generation'])
             self.logger.info(
                 """Loaded generation data into the database""")
+        curr.close()
+        conn.close()
 
 
 if __name__ == "__main__":

@@ -11,16 +11,46 @@ import boto3
 import pandas as pd
 from psycopg2.extensions import connection
 from psycopg2 import connect
-from psycopg2.extras import RealDictCursor, execute_values
+from psycopg2.extras import RealDictCursor, execute
 import datetime
 
 from pipeline.common import DataProcessor
 import config as cg
 from constants import Constants as ct
 
+load_dotenv()
 
-class GetUserData:
-    ...
+SCRIPT_NAME = (os.path.basename(__file__)).split(".")[0]
+LOGGING_LEVEL = logging.DEBUG
+logger = cg.setup_logging(SCRIPT_NAME, LOGGING_LEVEL)
+
+
+class Load:
+    """
+    Loads data into a database
+    """
+
+    def __init__(self) -> None:
+        """
+        Initialize class variables.
+        """
+        self.logger = logger
+
+    def get_user_data(self, conn, data):
+        """
+        Loads the data into an RDS database
+        """
+        curr = conn.cursor(cursor_factory=RealDictCursor)
+
+        sql_query = """SELECT * FROM user_data"""
+        curr.execute(sql_query)
+        data = curr.fetchall()
+
+        self.logger.info(
+            """Loaded user data from the database""")
+        curr.close()
+        conn.close()
+        return pd.DataFrame.from_dict(data)
 
 
 class DatabaseConnection:
