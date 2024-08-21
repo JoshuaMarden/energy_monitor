@@ -1,11 +1,11 @@
-# Dockerises modules and pushes to AWS
+# Dockerises modules and pushes to AWS.
 
-# This ONLY runs if executed from INSIDE infrastructure/
+# This ONLY runs if executed from INSIDE infrastructure??
 
 # Docker can only see files in subdirectories. Therefore all the
 # files used are imported to a temporarily created 'build_context' dir.
 # Then the script logs into AWS, dockerises modules, pushes them to AWS ECRs.
-# This build directory is cleaned up at the end.
+# The build directory is cleaned up at the end.
 # Purely for my personal interest, the script also times itself.
 
 # Variables
