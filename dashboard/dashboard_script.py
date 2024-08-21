@@ -32,16 +32,14 @@ class DataLoader:
 
         demand_query = "SELECT * FROM Demand"
         gen_query = "SELECT * FROM Generation"
-        cost_query = "SELECT * FROM Cost"
         carbon_query = "SELECT * FROM Carbon"
         demand_df = pd.read_sql_query(demand_query, conn)
-        cost_df = pd.read_sql_query(cost_query, conn)
         gen_df = pd.read_sql_query(gen_query, conn)
         carbon_df = pd.read_sql_query(carbon_query, conn)
 
         if conn:
             conn.close()
-            return gen_df, demand_df, cost_df, carbon_df
+            return gen_df, demand_df,   carbon_df
         raise ConnectionError("Failed to connect to Database")
 
 
@@ -117,7 +115,7 @@ class dashboard:
 
         return alt.Chart(df_interconnectors[["publish_time", "generated", "country"]]).mark_line().encode(x=alt.X('publish_time:T', title='Time'), y=alt.Y('generated:Q', title='Energy Generated MW'), color="country").properties(width=1400, height=1000)
 
-    def generate_dashboard(self, gen_df: pd.DataFrame, demand_df: pd.DataFrame, cost_df: pd.DataFrame, carbon_df: pd.DataFrame):
+    def generate_dashboard(self, gen_df: pd.DataFrame, demand_df: pd.DataFrame, carbon_df: pd.DataFrame):
         st.set_page_config(layout="wide")
         st.title("Energy Monitor")
         with st.container():
@@ -134,6 +132,18 @@ class dashboard:
                     with high_col:
                         st.metric(label="Highest Carbon Footprint at:", value=f"{
                             self.time_of_highest_carbon(carbon_df)}", delta=f"{max(carbon_df["forecast"].values)}", delta_color="inverse")
+                with st.expander("Join our mail list to be informed on the greenest time to charge your EV"):
+                    email_form = st.form("email_form")
+                    name = email_form.text_input("Name")
+                    email = email_form.text_input("Email")
+                    postcode = email_form.text_input("Postcode")
+                    hours_to_charge = email_form.slider(
+                        "How many hours do you normally charge for?", 1, 24)
+                    charging_preference = email_form.select_slider(
+                        "When do you normally charge?", options=["Morning", "Afternoon", "Evening", "Night"])
+
+                    email_form.form_submit_button("Submit")
+
             with col2:
                 st.header("What is Carbon Intensity?")
                 st.write("The carbon intensity of electricity is a measure of how much CO2 emissions are produced per kilowatt hour of electricity consumed.The carbon intensity of electricity is sensitive to small changes in carbon-intensive generation. Carbon intensity varies due to changes in electricity demand, low carbon generation (wind, solar, hydro, nuclear, biomass) and conventional generation.")
@@ -173,7 +183,7 @@ class dashboard:
 
 if __name__ == "__main__":
     connection = DataLoader.connect_to_db()
-    gen_df, demand_df, cost_df, carbon_df = DataLoader.fetch_data_from_tables(
+    gen_df, demand_df, carbon_df = DataLoader.fetch_data_from_tables(
         connection)
     energy_dashboard = dashboard()
-    energy_dashboard.generate_dashboard(gen_df, demand_df, cost_df, carbon_df)
+    energy_dashboard.generate_dashboard(gen_df, demand_df, carbon_df)
