@@ -1,5 +1,13 @@
 name: Unit Tests
 
+# Runs unit tests to check that changes to code haven't broken
+# anything.
+
+# If you modify this make sure changes are also relflected in 
+# `test_build_push.yml` as well, which conditionally pushes
+# changes to the cloud if its tests pass.
+
+
 on: [push, pull_request]
 
 jobs:
