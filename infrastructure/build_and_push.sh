@@ -64,6 +64,7 @@ time (
     # Clean up the build directory.
     rm -rf $BUILD_DIR
 
+    # Restart the AWS service so that the new docker images are used
     aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --force-new-deployment
 )
 # Will hopefully print execution time now.
