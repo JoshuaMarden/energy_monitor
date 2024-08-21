@@ -1,5 +1,9 @@
 name: Code Climate Coverage
 
+# Runs the coverage report for CodeClimate and pushes it to
+# CodeClimate so that it can be visualised and badges can be
+# generated.
+
 on: [push, pull_request]
 
 jobs:

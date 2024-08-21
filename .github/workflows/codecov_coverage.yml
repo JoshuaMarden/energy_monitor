@@ -1,5 +1,8 @@
 name: Pytest Coverage
 
+# Runs a covergae tests and pushes the result to CodeCov
+# so reports can be generated and badges integrated into README.md
+
 on: [push, pull_request]
 
 jobs:
@@ -26,13 +29,13 @@ jobs:
       run: |
         source venv/bin/activate
         pip install --upgrade pip
-        pip install pytest-cov  # Install pytest-cov which will pull in the correct version of coverage
-        pip install -r requirements.txt  # Install other dependencies
+        pip install pytest-cov
+        pip install -r requirements.txt
 
     - name: Run tests with coverage
       run: |
         source venv/bin/activate
-        pytest --cov=./ --cov-report=xml:coverage.xml  # Generate coverage.xml
+        pytest --cov=./ --cov-report=xml:coverage.xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

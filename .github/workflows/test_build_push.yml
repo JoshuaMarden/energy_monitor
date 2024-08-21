@@ -1,8 +1,18 @@
-# Pushes to Cloud but only if the tests pass!
 
 name: Deploy to Cloud
 
-on: [push, pull_request]
+# If an update is pushed to main, tests are run, and if they pass,
+# the new .sh script that dockerises modules and pushes them to the 
+# cloud is run.
+# (Tests should be in this script as well as their own)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   run-tests:

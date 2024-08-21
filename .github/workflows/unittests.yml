@@ -1,5 +1,7 @@
 name: Unit Tests
 
+# Runs unit tests.
+
 on: [push, pull_request]
 
 jobs:
