@@ -11,6 +11,8 @@
 # Variables
 REGION="eu-west-2"
 ACCOUNT_ID="129033205317"
+CLUSTER_NAME="c12-cluster"
+SERVICE_NAME="c12-energy-dashboard"
 REPO_PREFIX="c12-energy"
 REPO_SUFFIX=("extract" "extract-carbon" "pipeline" "dashboard")
 IMAGE_NAMES=("extract_to_s3" "extract_carbon" "transform_load" "dashboard")
@@ -61,5 +63,7 @@ time (
 
     # Clean up the build directory.
     rm -rf $BUILD_DIR
+
+    aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --force-new-deployment
 )
 # Will hopefully print execution time now.
