@@ -7,7 +7,7 @@ on: [push, pull_request]
 
 jobs:
   run-tests-and-coverage:
-    name: Run Tests and Generate Coverage Report For CodeCov
+    name: Generate and Upload Coverage Report For CodeCov
     runs-on: ubuntu-latest
 
     steps:

@@ -1,4 +1,4 @@
-name: Code Climate Coverage
+name: CodeClimate Coverage
 
 # Runs the coverage report for CodeClimate and pushes it to
 # CodeClimate so that it can be visualised and badges can be
