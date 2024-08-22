@@ -8,7 +8,7 @@
 - Python 3.12
 - Amazon AWS  ([with an access key and secret key](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html))
 - [Brew](https://brew.sh/) (to install Terraform)
-- (Terraform)[https://formulae.brew.sh/formula/terraform]
+- [Terraform](https://formulae.brew.sh/formula/terraform)
 - [Docker](https://docs.docker.com/desktop/install/mac-install/)
 
 - For badges and reports to be generated you will also need a [CodeCov](https://about.codecov.io/) and [CodeClimate](https://codeclimate.com/) account. These are free and will need to be linked to your own git repo using their respective browser-based GUIs.
@@ -141,5 +141,6 @@ SOFTWARE.
 </div>
 <div align="center">
 (If this is not displaying it is because it has not yet collected enough data to build a 'Coverage Over Time' graph)
+  
 ![Coverage Over Time](https://codecov.io/gh/JoshuaMarden/energy_monitor/graphs/commits.svg?token=5CLXJXIEE8)
 </div>
