@@ -90,8 +90,10 @@ class CustomDataProcessor(DataProcessor):
         if not data or "data" not in data:
             logger.warning("No data found in response.")
             return None
-
-        return pd.DataFrame(data["data"]['generationmix'])
+        df = pd.DataFrame(data["data"])
+        df["fuel_type"] = df['generationmix'].apply(lambda x: x['fuel'])
+        df["percentage"] = df['generationmix'].apply(lambda x: x['perc'])
+        return df
 
 
 class Main:

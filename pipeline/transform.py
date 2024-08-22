@@ -65,6 +65,8 @@ class Transform:
                 data['piechart'] = formatted_data
                 self.logger.info("""Transformed piechart data""")
 
+        print(data['piechart'])
+
         data = self.difference_of_dates(data)
         self.delete_read_files(files)
         return data
@@ -126,7 +128,8 @@ class Transform:
         a list of tuples
         """
         print(df)
-        df = df[['fuel', '']]
+        df = df[['fuel_type', 'from', 'percentage']]
+        return list(df.itertuples(index=False, name=None))
 
     def delete_read_files(self, files):
         """
@@ -184,7 +187,7 @@ class Load:
             execute_values(curr, sql_query, data['carbon'])
             self.logger.info(
                 """Loaded carbon data into the database""")
-        if data.get('demand'):
+        if data.get('generation'):
             sql_query = """INSERT INTO Generation (publish_time, publish_date,
                          fuel_type, gain_loss, generated, settlement_period)
                         VALUES %s
@@ -192,6 +195,14 @@ class Load:
             execute_values(curr, sql_query, data['generation'])
             self.logger.info(
                 """Loaded generation data into the database""")
+        if data.get('piechart'):
+            sql_query = """INSERT INTO generation_percent (fuel_type, date_time,
+                         slice_percentage)
+                        VALUES %s
+                        ON CONFLICT DO NOTHING"""
+            execute_values(curr, sql_query, data['piechart'])
+            self.logger.info(
+                """Loaded piechart data into the database""")
         curr.close()
         conn.close()
 
