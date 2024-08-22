@@ -4,12 +4,7 @@ to about when they the best time is to charge their EVs and other electric devic
 """
 import os
 import logging
-import glob
 from typing import Any, Dict, Optional
-
-
-from operator import itemgetter
-from itertools import groupby
 
 from dotenv import load_dotenv
 import datetime
