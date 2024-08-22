@@ -14,48 +14,15 @@ from psycopg2 import connect
 from psycopg2.extras import RealDictCursor, execute_values
 import datetime
 
+from pipeline.common import DataProcessor
 import config as cg
+from constants import Constants as ct
 
 load_dotenv()
 
 SCRIPT_NAME = (os.path.basename(__file__)).split(".")[0]
 LOGGING_LEVEL = logging.DEBUG
 logger = cg.setup_logging(SCRIPT_NAME, LOGGING_LEVEL)
-
-
-class S3bucket:
-    """
-    downloads files in an S3 bucket
-    """
-
-    def __init__(self) -> None:
-        """
-        Initialize class variables.
-        """
-        self.logger = logger
-        self.bucket = "c12-energy-tracker"
-        self.public_key = os.environ.get("ACCESS_KEY")
-        self.secret_key = os.environ.get("SECRET_KEY")
-
-    def get_client(self) -> boto3.client:
-        """Connects to the S3 instance and returns it"""
-        s3 = boto3.client('s3',
-                          aws_access_key_id=self.public_key,
-                          aws_secret_access_key=self.secret_key)
-        return s3
-
-    def get_files_from_bucket(self):
-        """
-        Downloads All files in the s3 Bucket
-        """
-        client = self.get_client()
-        data = client.list_objects(Bucket=self.bucket)
-        for file in data['Contents']:
-
-            client.download_file(self.bucket, file['Key'], f'''{
-                                 file['Key']} {file['LastModified']}''')
-            self.logger.info(f"""Downloaded file: '{file['Key']} {
-                             file['LastModified']}'""")
 
 
 class Transform:
@@ -89,35 +56,29 @@ class Transform:
                 formatted_data = self.demand_transform(df)
                 data['demand'] = formatted_data
                 self.logger.info("""Transformed demand data""")
-            if "cost" in file:
-                formatted_data = self.cost_transform(df)
-                if formatted_data:
-                    data['cost'] = formatted_data
-                self.logger.info("""Transformed cost data""")
             if "carbon" in file:
                 formatted_data = self.carbon_transform(df)
                 data['carbon'] = formatted_data
                 self.logger.info("""Transformed carbon data""")
-        diff = list(set(self.period_g) - set(self.period_c))
-        for period in diff:
-            for values in data['generation']:
 
-                if values[5] == period:
-                    if period == 2:
-                        yesterday = datetime.date.today() - datetime.timedelta(days=1)
-                        data['cost'].append((yesterday, 2, 0, 0))
-                    data['cost'].append((values[1], values[5], 0, 0))
-                    break
-
-        diff = list(set(self.time_g) - set(self.time_d))
-        for time in diff:
-            for values in data['generation']:
-                if values[0] == time:
-                    data['demand'].append((values[0], 0))
-                    break
-
+        data = self.difference_of_dates(data)
         self.delete_read_files(files)
         return data
+
+    def difference_of_dates(self, data_conflict: dict):
+        """
+        Works out the difference of dates between the time column of generation
+        and the time column of demand, adds the missing dates to demand and
+        returns it
+        Mainly to fix foreign key errors
+        """
+        diff = list(set(self.time_g) - set(self.time_d))
+        for time in diff:
+            for values in data_conflict['generation']:
+                if values[0] == time:
+                    data_conflict['demand'].append((values[0], 0))
+                    break
+        return data_conflict
 
     def generation_transform(self, df: pd.DataFrame) -> tuple:
         """
@@ -141,23 +102,6 @@ class Transform:
         """
         df = df.get(['startTime', 'demand'])
         self.time_d = df['startTime'].unique()
-        return list(df.itertuples(index=False, name=None))
-
-    def cost_transform(self, df: pd.DataFrame) -> tuple:
-        """
-        Filters and transforms the cost dataframe passed into it and returns
-        a list of tuples
-        """
-        df = df.get(['settlementDate', 'settlementPeriod',
-                     'systemSellPrice', 'systemBuyPrice'])
-        self.period_c = df['settlementPeriod'].unique()
-        if 2 in self.period_c:
-            yesterday = datetime.date.today() - datetime.timedelta(days=1)
-            df.loc[len(df.index)] = [str(yesterday), 2, 0, 0]
-        if 1 in self.period_c:
-            yesterday = datetime.date.today() - datetime.timedelta(days=1)
-            df.loc[len(df.index)] = [str(yesterday), 1, 0, 0]
-        print(df)
         return list(df.itertuples(index=False, name=None))
 
     def carbon_transform(self, df: pd.DataFrame) -> tuple:
@@ -221,15 +165,6 @@ class Load:
             execute_values(curr, sql_query, data['demand'])
             self.logger.info(
                 """Loaded demand data into the database""")
-        if data.get('cost'):
-            sql_query = """INSERT INTO Cost (publish_date, settlement_period, sell_price, buy_price)
-                        VALUES %s
-                        ON CONFLICT (publish_date, settlement_period) DO UPDATE
-                        SET sell_price=EXCLUDED.sell_price,
-                        buy_price=EXCLUDED.buy_price"""
-            execute_values(curr, sql_query, data['cost'])
-            self.logger.info(
-                """Loaded cost data into the database""")
         if data.get('demand'):
             sql_query = """INSERT INTO Carbon (publish_time, forecast, carbon_level)
                         VALUES %s
@@ -245,11 +180,20 @@ class Load:
             execute_values(curr, sql_query, data['generation'])
             self.logger.info(
                 """Loaded generation data into the database""")
+        curr.close()
+        conn.close()
 
 
 if __name__ == "__main__":
     db_conn = DatabaseConnection()
-    s3_bucket = S3bucket()
+    s3_bucket = DataProcessor(save_location="your_save_location",
+                              aws_access_key=os.getenv('AWS_ACCESS_KEY'),
+                              aws_secret_key=os.getenv('AWS_SECRET_KEY'),
+                              region=os.getenv('AWS_REGION'),
+                              s3_file_name="your_s3_file_name",
+                              bucket=ct.S3_BUCKET,
+                              logger=logger)
+    s3_bucket.get_s3_client()
     s3_bucket.get_files_from_bucket()
     tf = Transform()
     values = tf.get_data()

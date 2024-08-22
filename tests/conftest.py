@@ -1,25 +1,27 @@
 """
 Fixtures for pytesting
 """
-import pytest
-from unittest.mock import MagicMock
 import logging
+from unittest.mock import MagicMock
+import pytest
 
 from pipeline.common import DataProcessor
 from pipeline.extract_generation import APIClient as APIClientGeneration
 from pipeline.extract_demand import APIClient as APIClientDemand
-from pipeline.extract_price import APIClient as APIClientPrice
 from pipeline.extract_carbon import APIClient as APIClientCarbon
 
-from tests.mock_data.mock_dataframes import get_simple_mock_dataframe
+from mock_data.mock_dataframes import get_simple_mock_dataframe, get_carbon_mock_dataframe, get_cost_mock_dataframe, get_demand_mock_dataframe, get_generation_mock_dataframe
+
 
 @pytest.fixture
 def mock_logger():
     return MagicMock(spec=logging.Logger)
 
+
 @pytest.fixture
 def simple_mock_dataframe():
     return get_simple_mock_dataframe()
+
 
 @pytest.fixture
 def data_processor(mock_logger):
@@ -33,12 +35,14 @@ def data_processor(mock_logger):
         logger=mock_logger
     )
 
+
 @pytest.fixture
 def api_client_generation(mock_logger):
     """
     Fixture for APIClient from extract_generation
     """
     return APIClientGeneration(base_url="mock_url", logger=mock_logger)
+
 
 @pytest.fixture
 def api_client_demand(mock_logger):
@@ -47,6 +51,7 @@ def api_client_demand(mock_logger):
     """
     return APIClientDemand(base_url="mock_url", logger=mock_logger)
 
+
 @pytest.fixture
 def api_client_price(mock_logger):
     """
@@ -54,9 +59,30 @@ def api_client_price(mock_logger):
     """
     return APIClientPrice(base_url="mock_url", logger=mock_logger)
 
+
 @pytest.fixture
 def api_client_carbon(mock_logger):
     """
     Fixture for APIClient from extract_demand
     """
     return APIClientCarbon(base_url="mock_url", logger=mock_logger)
+
+
+@pytest.fixture
+def mock_gen_df():
+    return get_generation_mock_dataframe()
+
+
+@pytest.fixture
+def mock_demand_df():
+    return get_demand_mock_dataframe()
+
+
+@pytest.fixture
+def mock_cost_df():
+    return get_cost_mock_dataframe()
+
+
+@pytest.fixture
+def mock_carbon_df():
+    return get_carbon_mock_dataframe()

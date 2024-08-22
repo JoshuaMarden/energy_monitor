@@ -5,7 +5,6 @@ import pandas as pd
 from pipeline.extract_carbon import CustomDataProcessor
 from unittest.mock import patch, MagicMock
 from requests.exceptions import RequestException
-from tests.mock_data.mock_dataframes import get_dated_mock_dataframe
 
 
 @patch('pipeline.extract_carbon.requests.get')
@@ -21,10 +20,12 @@ def test_fetch_data_success(mock_get, api_client_carbon):
 
     result = api_client_carbon.fetch_data()
 
-    mock_get.assert_called_once_with(api_client_carbon.base_url, headers={'Accept': 'application/json'})
+    mock_get.assert_called_once_with(api_client_carbon.base_url, headers={
+                                     'Accept': 'application/json'})
     assert result == {'data': 'Battle of Orléans'}
 
-@patch('pipeline.extract_generation.requests.get')
+
+@patch('pipeline.extract_carbon.requests.get')
 def test_fetch_data_failure(mock_get, api_client_carbon):
     """
     Test the fetch_data method when the API request fails.
@@ -34,9 +35,8 @@ def test_fetch_data_failure(mock_get, api_client_carbon):
     result = api_client_carbon.fetch_data()
 
     assert result is None
-    api_client_carbon.logger.error.assert_called_once_with("An error occurred: API request failed")
 
-from tests.mock_data.mock_dataframes import get_dated_mock_dataframe
+    api_client_carbon.logger.error.assert_called_once_with("An error occurred: %s", mock_get.side_effect)
 
 def test_process_data_with_valid_data():
     """
@@ -44,8 +44,10 @@ def test_process_data_with_valid_data():
     """
     mock_response = {
         "data": [
-            {"from": "1066-09-14T00:00Z", "to": "1066-09-14T00:30Z", "intensity": {"forecast": 0, "index": "very low"}},
-            {"from": "1066-09-14T00:30Z", "to": "1066-09-14T01:00Z", "intensity": {"forecast": 1000000, "index": "very high"}}
+            {"from": "1066-09-14T00:00Z", "to": "1066-09-14T00:30Z",
+                "intensity": {"forecast": 0, "index": "very low"}},
+            {"from": "1066-09-14T00:30Z", "to": "1066-09-14T01:00Z",
+                "intensity": {"forecast": 1000000, "index": "very high"}}
         ]
     }
 
@@ -62,6 +64,7 @@ def test_process_data_with_valid_data():
 
     pd.testing.assert_frame_equal(df, expected_df)
 
+
 def test_process_data_with_no_data(caplog):
     """
     Test the process_data method when no data is provided.
@@ -72,6 +75,7 @@ def test_process_data_with_no_data(caplog):
 
     assert result is None
     assert "No data found in response." in caplog.text
+
 
 def test_process_data_with_missing_data_key(caplog):
     """
@@ -84,6 +88,3 @@ def test_process_data_with_missing_data_key(caplog):
 
     assert result is None
     assert "No data found in response." in caplog.text
-
-
-

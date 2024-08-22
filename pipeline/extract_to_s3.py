@@ -3,11 +3,11 @@ import logging
 import timeit
 from extract_generation import main as extract_generation
 from extract_demand import main as extract_demand
-from extract_price import main as extract_price
 
-
+from constants import Constants as ct
 import config as cg
-save_directory = cg.DATA
+
+save_directory = ct.DATA
 if not os.path.exists(save_directory):
     os.makedirs(save_directory)
 
@@ -33,12 +33,6 @@ def pipeline():
     logger.info("==> Executing extract_demand..")
     logger.info("===========")
     extract_time = timeit.timeit(extract_demand, number=1)
-    logger.info("Extract script completed in %s seconds", extract_time)
-
-    logger.info("===========")
-    logger.info("==> Executing extract_price..")
-    logger.info("===========")
-    extract_time = timeit.timeit(extract_price, number=1)
     logger.info("Extract script completed in %s seconds", extract_time)
 
     logger.info("===============")
