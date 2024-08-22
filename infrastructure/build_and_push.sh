@@ -14,9 +14,9 @@ ACCOUNT_ID="129033205317"
 CLUSTER_NAME="c12-ecs-cluster"
 SERVICE_NAME="c12-energy-dashboard"
 REPO_PREFIX="c12-energy"
-REPO_SUFFIX=("extract" "extract-carbon" "pipeline" "dashboard")
-IMAGE_NAMES=("extract_to_s3" "extract_carbon" "transform_load" "dashboard")
-DOCKERFILES=("Dockerfile.extract_many" "Dockerfile.extract_carbon" "Dockerfile.transform_load" "Dockerfile.dashboard")
+REPO_SUFFIX=("extract" "extract-carbon" "pipeline" "dashboard", "email-service")
+IMAGE_NAMES=("extract_to_s3" "extract_carbon" "transform_load" "dashboard", "email-service")
+DOCKERFILES=("Dockerfile.extract_many" "Dockerfile.extract_carbon" "Dockerfile.transform_load" "Dockerfile.dashboard", "Dockerfile.email")
 ECR_URL="${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com"
 PLATFORM="linux/amd64"
 BUILD_DIR="build_context"
@@ -28,6 +28,7 @@ FILES_TO_COPY=(
     "../config.py"
     "../constants.py"
     "../requirements.txt"
+    "../email_service"
     "Dockerfile.*"
 )
 
