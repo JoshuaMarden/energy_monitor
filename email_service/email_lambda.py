@@ -11,7 +11,7 @@ import boto3
 import pandas as pd
 from psycopg2.extensions import connection
 from psycopg2 import connect
-from psycopg2.extras import RealDictCursor, execute
+from psycopg2.extras import RealDictCursor
 import datetime
 
 from pipeline.common import DataProcessor
@@ -36,7 +36,7 @@ class Load:
         """
         self.logger = logger
 
-    def get_user_data(self, conn, data):
+    def get_user_data(self, conn):
         """
         Loads the data into an RDS database
         """
@@ -68,3 +68,10 @@ class DatabaseConnection:
         )
         connecting.autocommit = True
         return connecting
+
+
+if __name__ == "__main__":
+    db = DatabaseConnection()
+    conn = db.get_connection()
+    load = Load()
+    print(load.get_user_data(conn))
