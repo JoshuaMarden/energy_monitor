@@ -60,6 +60,12 @@ class Transform:
                 formatted_data = self.carbon_transform(df)
                 data['carbon'] = formatted_data
                 self.logger.info("""Transformed carbon data""")
+            if "piechart" in file:
+                formatted_data = self.piechart_transform(df)
+                data['piechart'] = formatted_data
+                self.logger.info("""Transformed piechart data""")
+
+        print(data['piechart'])
 
         data = self.difference_of_dates(data)
         self.delete_read_files(files)
@@ -114,6 +120,15 @@ class Transform:
         labels = ["very low", "low", "moderate", "high", "very high"]
         df['carbon level'] = pd.cut(
             df['forecast'], bins=bins, labels=labels, right=True)
+        return list(df.itertuples(index=False, name=None))
+
+    def piechart_transform(self, df: pd.DataFrame) -> tuple:
+        """
+        Filters and transforms the carbon dataframe passed into it and returns
+        a list of tuples
+        """
+        print(df)
+        df = df[['fuel_type', 'from', 'percentage']]
         return list(df.itertuples(index=False, name=None))
 
     def delete_read_files(self, files):
@@ -172,7 +187,7 @@ class Load:
             execute_values(curr, sql_query, data['carbon'])
             self.logger.info(
                 """Loaded carbon data into the database""")
-        if data.get('demand'):
+        if data.get('generation'):
             sql_query = """INSERT INTO Generation (publish_time, publish_date,
                          fuel_type, gain_loss, generated, settlement_period)
                         VALUES %s
@@ -180,6 +195,14 @@ class Load:
             execute_values(curr, sql_query, data['generation'])
             self.logger.info(
                 """Loaded generation data into the database""")
+        if data.get('piechart'):
+            sql_query = """INSERT INTO generation_percent (fuel_type, date_time,
+                         slice_percentage)
+                        VALUES %s
+                        ON CONFLICT DO NOTHING"""
+            execute_values(curr, sql_query, data['piechart'])
+            self.logger.info(
+                """Loaded piechart data into the database""")
         curr.close()
         conn.close()
 

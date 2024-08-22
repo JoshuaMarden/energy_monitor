@@ -26,7 +26,7 @@ CREATE TABLE user_data (
     PRIMARY KEY (users_id)
 );
 CREATE TABLE generation_percent (
-    fuel_type INT,
+    fuel_type VARCHAR,
     date_time TIMESTAMP,
     slice_percentage FLOAT,
     PRIMARY KEY (date_time, fuel_type)
