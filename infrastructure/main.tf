@@ -346,7 +346,7 @@ resource "aws_ecs_service" "dashboard" {
   }
 }
 
-# Lambda running carbon extract
+# Lambda running email service
 resource "aws_lambda_function" "email_service" {
   architectures                      = ["x86_64"]
   function_name                      = "c12-energy-email-service"

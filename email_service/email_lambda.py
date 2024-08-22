@@ -5,20 +5,20 @@ to about when they the best time is to charge their EVs and other electric devic
 import os
 import logging
 from typing import Any, Dict, Optional
-
-from dotenv import load_dotenv
 import datetime
+
 import boto3
 import requests
 import pandas as pd
 from psycopg2.extensions import connection
 from psycopg2 import connect
 from psycopg2.extras import RealDictCursor
-import datetime
+from dotenv import load_dotenv
 
 from pipeline.common import DataProcessor
 import config as cg
 from constants import Constants as ct
+
 
 load_dotenv()
 
@@ -26,7 +26,7 @@ ENDPOINT_1 = "https://api.carbonintensity.org.uk/regional/intensity/"
 ENDPOINT_2 = "/fw24h/postcode/"
 SCRIPT_NAME = (os.path.basename(__file__)).split(".")[0]
 LOGGING_LEVEL = logging.DEBUG
-logger = cg.setup_logging(SCRIPT_NAME, LOGGING_LEVEL)
+global_logger = cg.setup_logging(SCRIPT_NAME, LOGGING_LEVEL)
 
 
 class APIClient:
@@ -36,13 +36,13 @@ class APIClient:
     """
 
     def __init__(self,
-                 logger: logging.Logger = logger) -> None:
+                 logger: logging.Logger = global_logger) -> None:
         """
         Initialise class variables.
         """
         self.logger = logger
 
-    def fetch_regional_data(self, postcode) -> Optional[Dict[str, Any]]:
+    def fetch_regional_data(self, postcode: str) -> Optional[Dict[str, Any]]:
         """
         Makes an API request, returning data as json.
         """
@@ -51,7 +51,7 @@ class APIClient:
         base_url = ENDPOINT_1 + str(now) + ENDPOINT_2 + postcode.split(' ')[0]
 
         try:
-            response = requests.get(base_url, headers=headers)
+            response = requests.get(base_url, headers=headers, timeout=20)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -64,9 +64,10 @@ class Extract:
     Extracts data from a database
     """
 
-    def __init__(self) -> None:
+    def __init__(self,
+                 logger: logging.Logger = global_logger) -> None:
         """
-        Initialize class variables.
+        Initialise class variables.
         """
         self.logger = logger
 
@@ -81,7 +82,7 @@ class Extract:
         connecting.autocommit = True
         return connecting
 
-    def get_user_data(self, conn):
+    def get_user_data(self, conn: connection):
         """
         Loads the data into an RDS database
         """
@@ -99,36 +100,22 @@ class Extract:
 
 
 class SendEmail:
+    """
+    GGets the data for emails and sends the emails
+    """
 
-    def send_email(self, data):
-        print(data)
-        ses = boto3.client('ses',
-                           aws_access_key_id=os.environ.get("ACCESS_KEY"),
-                           aws_secret_access_key=os.environ.get("SECRET_KEY"),
-                           region_name='eu-west-2')
-        ses.send_email(
-            Source='trainee.jonathan.spence@sigmalabs.co.uk',
-            Destination={
-                'ToAddresses': [
-                    'trainee.jonathan.spence@sigmalabs.co.uk'
-                ]
-            },
-            Message={
-                'Subject': {
-                    'Data': 'Hours you should charge your car based on the lowest carbon levels',
-                },
-                'Body': {
-                    'Html': {
-                        'Data': f'Charge your car between {data[0]} and {data[1]}',
-                    }
-                }
-            },
-        )
+    def __init__(self,
+                 logger: logging.Logger = global_logger) -> None:
+        """
+        Initialise class variables.
+        """
+        self.logger = logger
 
-
-class ChargeHours:
-
-    def get_possible_hours(self, user_data):
+    def get_possible_hours(self, user_data: pd.DataFrame) -> list[dict]:
+        """
+        Finds the time range that is the best time to use charge your car
+        Based on how long you want to charge your car
+        """
         api_conn = APIClient()
         hours_data = []
 
@@ -158,13 +145,44 @@ class ChargeHours:
                               df['from'].head(1).values[0], df['from'].tail(1).values[0]]})
         return hours_data
 
+    def get_client(self) -> boto3.client:
+        return boto3.client('ses',
+                            aws_access_key_id=os.environ.get("ACCESS_KEY"),
+                            aws_secret_access_key=os.environ.get("SECRET_KEY"),
+                            region_name=os.environ.get("AWS_REGION"))
+
+    def send_email(self, data: list) -> None:
+        """
+        Sends an email to people updating them on when the greenest time to
+        charge your car is
+        """
+        ses = self.get_client()
+        ses.send_email(
+            Source='trainee.jonathan.spence@sigmalabs.co.uk',
+            Destination={
+                'ToAddresses': [
+                    'trainee.jonathan.spence@sigmalabs.co.uk'
+                ]
+            },
+            Message={
+                'Subject': {
+                    'Data': 'Hours you should charge your car based on the lowest carbon levels',
+                },
+                'Body': {
+                    'Html': {
+                        'Data': f'Charge your car between {data[0]} and {data[1]}',
+                    }
+                }
+            },
+        )
+
 
 if __name__ == "__main__":
     extract = Extract()
-    charge_hours = ChargeHours()
-    conn = extract.get_connection()
-    user_datadb = extract.get_user_data(conn)
-    data = charge_hours.get_possible_hours(user_datadb)
     email = SendEmail()
-    for user in data:
-        email.send_email(user['hours'])
+    db_conn = extract.get_connection()
+    user_datadb = extract.get_user_data(db_conn)
+    users_hours_data = email.get_possible_hours(user_datadb)
+    email = SendEmail()
+    for users_hours in users_hours_data:
+        email.send_email(users_hours['hours'])
