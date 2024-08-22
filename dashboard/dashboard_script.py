@@ -14,8 +14,12 @@ DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_NAME = os.getenv('DB_NAME')
 
+CURRENT_TIME = dt.datetime.now()
+LAST_24_HOURS = CURRENT_TIME - timedelta(hours=24)
+NEXT_24_HOURS = CURRENT_TIME + timedelta(hours=24)
 
-class DataLoader:
+
+class DataBase:
     @staticmethod
     def connect_to_db(db_host: str = DB_HOST, db_port: str = DB_PORT,
                       db_user: str = DB_USER, db_password: str = DB_PASSWORD,
@@ -39,19 +43,37 @@ class DataLoader:
         demand_df = pd.read_sql_query(demand_query, conn)
         gen_df = pd.read_sql_query(gen_query, conn)
         carbon_df = pd.read_sql_query(carbon_query, conn)
+        carbon_df = carbon_df[-48:]
         pie_df = pd.read_sql_query(piechart_query, conn)
 
         if conn:
             conn.close()
-            return gen_df, demand_df,   carbon_df
+            return gen_df, demand_df,   carbon_df, pie_df
         raise ConnectionError("Failed to connect to Database")
 
+    def submit_form(self, name, email, postcode, hours_to_charge, charging_preference):
+        conn = self.connect_to_db()
+        cursor = conn.cursor()
+        insert_query = """
+        INSERT INTO user_data (users_name, user_email, user_postcode, hours_to_charge, user_preference)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (name, email, postcode,
+                                      hours_to_charge, charging_preference))
+        conn.commit()
 
-class dashboard:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+class Dashboard:
     def __init__(self) -> None:
         pass
 
     def carbon_plots(self, carbon_df: pd.DataFrame) -> alt.Chart:
+
         return alt.Chart(carbon_df).mark_bar().encode(alt.X('publish_time:T', title='Time'),
                                                       y=alt.Y('forecast:Q', title='Carbon Intensity'), color='carbon_level').properties(width=650, height=400)
 
@@ -68,11 +90,13 @@ class dashboard:
                       "NUCLEAR", "OCGT", "OIL", "OTHER", "PS", "WIND"]
         df_fuel_types = gen_df[gen_df['fuel_type'].isin(
             fuel_types)]
-
         return alt.Chart(df_fuel_types[["publish_time", "generated", "fuel_type"]]).mark_line().encode(
             x=alt.X('publish_time:T', title='Time'), y=alt.Y('generated:Q', title='Energy Generated MW'),
             color="fuel_type").properties(width=1000, height=1000)
-    # def generate_piechart(pie_df):
+
+    def generate_piechart(self, pie_df):
+        pie_df = pie_df[["fuel_type", "slice_percentage"]]
+        return alt.Chart(pie_df).mark_arc().encode(theta="slice_percentage", color="fuel_type")
 
     def intensity_factors_df(self) -> alt.Chart:
         intensity_factors = {'Energy Source': ['Biomass', 'Coal', 'Dutch Imports', 'French Imports', 'Gas (Combined Cycle)', 'Gas (Open Cycle)',
@@ -120,7 +144,7 @@ class dashboard:
 
         return alt.Chart(df_interconnectors[["publish_time", "generated", "country"]]).mark_line().encode(x=alt.X('publish_time:T', title='Time'), y=alt.Y('generated:Q', title='Energy Generated MW'), color="country").properties(width=1400, height=1000)
 
-    def generate_dashboard(self, gen_df: pd.DataFrame, demand_df: pd.DataFrame, carbon_df: pd.DataFrame):
+    def generate_dashboard(self, gen_df: pd.DataFrame, demand_df: pd.DataFrame, carbon_df: pd.DataFrame, pie_df: pd.DataFrame, energy_db: DataBase):
         st.set_page_config(layout="wide")
         st.title("Energy Monitor")
         carbon_tab, generation_tab = st.tabs(
@@ -152,7 +176,10 @@ class dashboard:
                     charging_preference = email_form.select_slider(
                         "When do you normally charge?", options=["Morning", "Afternoon", "Evening", "Night"])
 
-                    email_form.form_submit_button("Submit")
+                    submit = email_form.form_submit_button("Submit")
+                    if submit:
+                        energy_db.submit_form(name, email, postcode,
+                                              hours_to_charge, charging_preference)
 
                 with col2:
                     st.header("What is Carbon Intensity?")
@@ -167,9 +194,7 @@ class dashboard:
         with generation_tab:
             show_all_data = st.checkbox('Show all historical data')
             if not show_all_data:
-                current_time = dt.datetime.now()
-                last_24_hours = current_time - timedelta(hours=24)
-                filtered_df = gen_df[gen_df['publish_time'] >= last_24_hours]
+                filtered_df = gen_df[gen_df['publish_time'] >= LAST_24_HOURS]
             else:
                 filtered_df = gen_df
             with st.container():
@@ -177,6 +202,8 @@ class dashboard:
                 col1, col2 = st.columns([3, 1])
                 with col1:
                     st.altair_chart(self.generation_fuel_type(filtered_df))
+                    st.write("Energy generated in the last 30 minutes")
+                    st.altair_chart(self.generate_piechart(pie_df))
                 with col2:
                     with st.expander("Fuel Type Information"):
                         st.write("""
@@ -199,8 +226,10 @@ class dashboard:
 
 
 if __name__ == "__main__":
-    connection = DataLoader.connect_to_db()
-    gen_df, demand_df, carbon_df = DataLoader.fetch_data_from_tables(
+    energy_db = DataBase()
+    connection = energy_db.connect_to_db()
+    gen_df, demand_df, carbon_df, pie_df = energy_db.fetch_data_from_tables(
         connection)
-    energy_dashboard = dashboard()
-    energy_dashboard.generate_dashboard(gen_df, demand_df, carbon_df)
+    energy_dashboard = Dashboard()
+    energy_dashboard.generate_dashboard(
+        gen_df, demand_df, carbon_df, pie_df, energy_db)
