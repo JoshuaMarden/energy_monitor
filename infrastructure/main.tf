@@ -53,7 +53,7 @@ resource "aws_cloudwatch_event_rule" "to_tl" {
       },
       "object": {
       "key": [{
-        "prefix": "raw_cost"
+        "prefix": "raw_piechart"
       }]}
       
     }

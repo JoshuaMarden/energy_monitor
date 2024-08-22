@@ -46,17 +46,6 @@ class TestTransform:
             assert isinstance(time, datetime.datetime) == True
             assert isinstance(row[1], int) == True
 
-    def test_cost_transform_general(self, mock_cost_df):
-        trans_df = transform.cost_transform(mock_cost_df)
-        assert isinstance(trans_df, list)
-        for row in trans_df:
-            assert len(row) == 4
-            date = datetime.datetime.strptime(row[0], "%Y-%m-%d")
-            assert isinstance(date, datetime.datetime) == True
-            assert isinstance(row[1], int) == True
-            assert isinstance(row[2], int) == True
-            assert isinstance(row[3], int) == True
-
     def test_carbon_transform_general(self, mock_carbon_df):
         trans_df = transform.carbon_transform(mock_carbon_df)
         assert isinstance(trans_df, list)
