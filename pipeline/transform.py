@@ -60,6 +60,10 @@ class Transform:
                 formatted_data = self.carbon_transform(df)
                 data['carbon'] = formatted_data
                 self.logger.info("""Transformed carbon data""")
+            if "piechart" in file:
+                formatted_data = self.piechart_transform(df)
+                data['piechart'] = formatted_data
+                self.logger.info("""Transformed piechart data""")
 
         data = self.difference_of_dates(data)
         self.delete_read_files(files)
@@ -115,6 +119,14 @@ class Transform:
         df['carbon level'] = pd.cut(
             df['forecast'], bins=bins, labels=labels, right=True)
         return list(df.itertuples(index=False, name=None))
+
+    def piechart_transform(self, df: pd.DataFrame) -> tuple:
+        """
+        Filters and transforms the carbon dataframe passed into it and returns
+        a list of tuples
+        """
+        print(df)
+        df = df[['fuel', '']]
 
     def delete_read_files(self, files):
         """
