@@ -2,6 +2,7 @@
 *.venv
 *.env
 *.tfvars
+*explore.ipynb
 
 # Logs and Logging-Related
 tmp/logs/*
