@@ -388,7 +388,7 @@ resource "aws_iam_role" "email_service" {
 resource "aws_scheduler_schedule" "lambda_schedule_1_day_1" {
   group_name                   = "default"
   name                         = "c12-energy-email_service"
-  schedule_expression          = "cron(* * * * ? *)"
+  schedule_expression          = "cron(0 6 * * ? *)"
   schedule_expression_timezone = "UTC"
   state                        = "ENABLED"
   flexible_time_window {
@@ -396,8 +396,67 @@ resource "aws_scheduler_schedule" "lambda_schedule_1_day_1" {
     mode                      = "FLEXIBLE"
   }
   target {
-    arn      = aws_lambda_function.extract_carbon.arn
-    role_arn = aws_iam_role.extract_carbon.arn
+    arn      = aws_lambda_function.email_service.arn
+    role_arn = aws_iam_role.email_service.arn
+    retry_policy {
+      maximum_event_age_in_seconds = 86400
+      maximum_retry_attempts       = 185
+    }
+  }
+}
+
+# Lambda running email service
+resource "aws_lambda_function" "webhook" {
+  architectures                      = ["x86_64"]
+  function_name                      = "c12-energy-webhooks"
+  image_uri                          = "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c12-energy-webhooks:latest"
+  package_type                       = "Image"
+  role                               = aws_iam_role.lambda.arn
+  environment {
+    variables = {
+      ACCESS_KEY_ID = var.AWS_ACCESS_KEY
+      SECRET_ACCESS_KEY = var.AWS_SECRET_KEY
+    }
+  }
+  logging_config {
+    log_format            = "Text"
+    log_group             = "/aws/lambda/c12-energy-webhooks"
+  }
+}
+resource "aws_iam_role" "webhook" {
+  name = "c12-energy-webhook"
+  assume_role_policy = jsonencode({
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Condition = {
+        StringEquals = {
+          "aws:SourceAccount" = "129033205317"
+        }
+      }
+      Effect = "Allow"
+      Principal = {
+        Service = "scheduler.amazonaws.com"
+      }
+    }]
+    Version = "2012-10-17"
+  })
+  managed_policy_arns   = ["arn:aws:iam::129033205317:policy/service-role/Amazon-EventBridge-Scheduler-Execution-Policy-9ddb4bfa-cc6b-405a-9275-03df4997c2e8"]
+  max_session_duration  = 3600
+  path                  = "/service-role/"
+}
+resource "aws_scheduler_schedule" "lambda_schedule_1_hour_1" {
+  group_name                   = "default"
+  name                         = "c12-energy-webhooks"
+  schedule_expression          = "cron(0 */1 * * ? *)"
+  schedule_expression_timezone = "UTC"
+  state                        = "ENABLED"
+  flexible_time_window {
+    maximum_window_in_minutes = 15
+    mode                      = "FLEXIBLE"
+  }
+  target {
+    arn      = aws_lambda_function.webhook.arn
+    role_arn = aws_iam_role.webhook.arn
     retry_policy {
       maximum_event_age_in_seconds = 86400
       maximum_retry_attempts       = 185
