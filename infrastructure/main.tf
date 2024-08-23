@@ -346,7 +346,7 @@ resource "aws_ecs_service" "dashboard" {
   }
 }
 
-# Lambda running carbon extract
+# Lambda running email service
 resource "aws_lambda_function" "email_service" {
   architectures                      = ["x86_64"]
   function_name                      = "c12-energy-email-service"
@@ -388,7 +388,7 @@ resource "aws_iam_role" "email_service" {
 resource "aws_scheduler_schedule" "lambda_schedule_1_day_1" {
   group_name                   = "default"
   name                         = "c12-energy-email_service"
-  schedule_expression          = "cron(0 1 * * ? *)"
+  schedule_expression          = "cron(* * * * ? *)"
   schedule_expression_timezone = "UTC"
   state                        = "ENABLED"
   flexible_time_window {
