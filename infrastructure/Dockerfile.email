@@ -19,4 +19,4 @@ COPY ../constants.py .
 EXPOSE 4501
 
 # Define the command to run the application
-CMD ["python3", "email_service.py"]
+CMD ["python3", "email_lambda.py"]
