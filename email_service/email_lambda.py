@@ -15,7 +15,6 @@ from psycopg2 import connect
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
-from pipeline.common import DataProcessor
 import config as cg
 from constants import Constants as ct
 
@@ -130,13 +129,13 @@ class SendEmail:
             df_lowest = df.sort_values(
                 'forecast').head(1)
             lowest_index = list(df_lowest.index)[0]
-            hours = user['hours_to_charge']
+            hours = user['hours_to_charge']*2
             low = lowest_index - hours
             high = lowest_index + hours
             if low <= 0:
-                df = df.head(hours*2)
+                df = df.head(hours)
             elif high >= 48:
-                df = df.tail(hours*2)
+                df = df.tail(hours)
 
             else:
                 df = df[(df.index >= low) & (df.index <= high)]
@@ -146,9 +145,14 @@ class SendEmail:
         return hours_data
 
     def get_client(self) -> boto3.client:
+        """
+        gets the client
+        """
+
         return boto3.client('ses',
-                            aws_access_key_id=os.environ.get("ACCESS_KEY"),
-                            aws_secret_access_key=os.environ.get("SECRET_KEY"),
+                            aws_access_key_id=os.environ.get("AWS_ACCESS_KEY"),
+                            aws_secret_access_key=os.environ.get(
+                                "AWS_SECRET_KEY"),
                             region_name=os.environ.get("AWS_REGION"))
 
     def send_email(self, data: list) -> None:

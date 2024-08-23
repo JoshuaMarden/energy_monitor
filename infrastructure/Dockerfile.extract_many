@@ -10,6 +10,7 @@ RUN pip3 install -r requirements.txt
 # Copy necessary Python scripts from the pipeline directory into the container
 COPY ../pipeline/extract_demand.py .
 COPY ../pipeline/extract_generation.py .
+COPY ../pipeline/extract_piechart.py .
 COPY ../pipeline/extract_to_s3.py .
 COPY ../pipeline/common.py .
 
