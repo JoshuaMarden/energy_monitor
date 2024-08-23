@@ -5,6 +5,7 @@ import psycopg2
 import altair as alt
 import datetime as dt
 from datetime import timedelta
+from PIL import Image
 from dotenv import load_dotenv
 
 load_dotenv('.env')
@@ -16,7 +17,6 @@ DB_NAME = os.getenv('DB_NAME')
 
 CURRENT_TIME = dt.datetime.now()
 LAST_24_HOURS = CURRENT_TIME - timedelta(hours=24)
-NEXT_24_HOURS = CURRENT_TIME + timedelta(hours=24)
 
 
 class DataBase:
@@ -146,7 +146,12 @@ class Dashboard:
 
     def generate_dashboard(self, gen_df: pd.DataFrame, demand_df: pd.DataFrame, carbon_df: pd.DataFrame, pie_df: pd.DataFrame, energy_db: DataBase):
         st.set_page_config(layout="wide")
-        st.title("Energy Monitor")
+        logo = Image.open("energy_logo.png")
+        title_col, logo_col = st.columns([1, 3])
+        with title_col:
+            st.title("Energy Monitor")
+        with logo_col:
+            st.image(logo)
         carbon_tab, generation_tab = st.tabs(
             ["Carbon Impact", "Energy Generation"])
 
