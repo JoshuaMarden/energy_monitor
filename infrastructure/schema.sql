@@ -41,4 +41,3 @@ CREATE TABLE Generation (
     PRIMARY KEY (publish_time, fuel_type),
     FOREIGN KEY (publish_time) REFERENCES Demand(publish_time)
 );
-CREATE TABLE 
