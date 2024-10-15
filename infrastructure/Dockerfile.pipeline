@@ -4,6 +4,9 @@ FROM python:3.12
 # Set the working directory inside the container to /app
 WORKDIR /app
 
+# Install necessary development libraries for psycopg2
+RUN apt-get update && apt-get install -y libpq-dev gcc
+
 # Copy the requirements file and install dependencies
 COPY ../requirements.txt .
 RUN pip3 install -r requirements.txt
@@ -11,7 +14,6 @@ RUN pip3 install -r requirements.txt
 # Copy necessary Python scripts from the pipeline directory into the container
 COPY pipeline/extract_to_s3.py .
 COPY pipeline/extract_carbon.py .
-COPY pipeline/extract_many.py .
 COPY pipeline/transform.py .
 COPY pipeline/common.py .
 
