@@ -1,14 +1,14 @@
 import os
 import logging
 import timeit
-from pipeline.extract_generation import main as extract_generation
+from extract_generation import main as extract_generation
 from extract_demand import main as extract_demand
-from extract_price import main as extract_price
-from extract_carbon import main as extract_carbon
+from extract_piechart import main as extract_piechart
 
+from constants import Constants as ct
 import config as cg
 
-save_directory = 'tmp/data'
+save_directory = ct.DATA
 if not os.path.exists(save_directory):
     os.makedirs(save_directory)
 
@@ -37,15 +37,9 @@ def pipeline():
     logger.info("Extract script completed in %s seconds", extract_time)
 
     logger.info("===========")
-    logger.info("==> Executing extract_price..")
+    logger.info("==> Executing extract_piechart..")
     logger.info("===========")
-    extract_time = timeit.timeit(extract_price, number=1)
-    logger.info("Extract script completed in %s seconds", extract_time)
-
-    logger.info("===========")
-    logger.info("==> Executing extract_carbon..")
-    logger.info("===========")
-    extract_time = timeit.timeit(extract_carbon, number=1)
+    extract_time = timeit.timeit(extract_piechart, number=1)
     logger.info("Extract script completed in %s seconds", extract_time)
 
     logger.info("===============")

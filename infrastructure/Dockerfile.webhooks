@@ -8,15 +8,15 @@ COPY ../requirements.txt .
 RUN pip3 install -r requirements.txt
 
 # Copy necessary Python scripts from the pipeline directory into the container
-COPY ../pipeline/transform.py .
-COPY ../pipeline/common.py .
+COPY ../email_service/webhooks.py .
+
 
 # Copy other configuration files from the root directory
 COPY ../config.py .
 COPY ../constants.py .
 
 # Expose necessary port
-EXPOSE 443
+EXPOSE 4501
 
 # Define the command to run the application
-CMD ["python3", "transform.py"]
+CMD ["python3", "webhooks.py"]

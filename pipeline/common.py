@@ -1,29 +1,29 @@
 """
 Holds the classes that are common the the pipelines' extract scripts
 """
-import requests
 import logging
 import pandas as pd
 import boto3
 from typing import Dict, Any, Optional
-        
+
+
 class DataProcessor:
     """
     Generic data processing class that handles saving and uploading data.
     """
 
-    def __init__(self, save_location: str, 
-                 aws_access_key: str, 
-                 aws_secret_key: str, 
-                 region: str, 
-                 s3_file_name: str, 
-                 bucket: str, 
+    def __init__(self, save_location: str,
+                 aws_access_key: str,
+                 aws_secret_key: str,
+                 region: str,
+                 s3_file_name: str,
+                 bucket: str,
                  logger: logging.Logger) -> None:
         """
         Initialize class variables.
 
-        All vars are intitiated here as flexibility is irrelevant,
-        readability and convenicne is King.
+        All vars are initiated here as flexibility is irrelevant,
+        readability and convenience is King.
         """
         self.save_location = save_location
         self.aws_access_key = aws_access_key
@@ -76,7 +76,20 @@ class DataProcessor:
 
         try:
             with open(self.save_location, 'rb') as file_data:
-                self.s3_client.put_object(Bucket=self.bucket, Key=self.s3_file_name, Body=file_data)
-            self.logger.info(f"Data successfully saved to S3 as `{self.s3_file_name}`.")
+                self.s3_client.put_object(
+                    Bucket=self.bucket, Key=self.s3_file_name, Body=file_data)
+            self.logger.info(f"Data successfully saved to S3 as `{
+                             self.s3_file_name}`.")
         except Exception as e:
             self.logger.error(f"Error saving data to S3: {e}")
+
+    def get_files_from_bucket(self) -> None:
+        """
+        Downloads All files in the s3 Bucket
+        """
+        for file in self.s3_client.list_objects(Bucket=self.bucket)['Contents']:
+
+            self.s3_client.download_file(self.bucket, file['Key'], f'''{
+                file['Key']} {file['LastModified']}''')
+            self.logger.info(f"""Downloaded file: '{file['Key']} {
+                             file['LastModified']}'""")
