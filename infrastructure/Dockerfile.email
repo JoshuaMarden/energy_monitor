@@ -1,0 +1,25 @@
+FROM python:3.12
+
+# Set the working directory inside the container to /app
+WORKDIR /app
+
+# Install necessary development libraries for psycopg2
+RUN apt-get update && apt-get install -y libpq-dev gcc
+
+# Copy the requirements file and install dependencies
+COPY ../requirements.txt .
+RUN pip3 install -r requirements.txt
+
+# Copy necessary Python scripts from the pipeline directory into the container
+COPY ../email_service/email_lambda.py .
+
+
+# Copy other configuration files from the root directory
+COPY ../config.py .
+COPY ../constants.py .
+
+# Expose necessary port
+EXPOSE 4501
+
+# Define the command to run the application
+CMD ["python3", "email_service.py"]

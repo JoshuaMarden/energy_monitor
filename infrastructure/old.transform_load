@@ -1,0 +1,26 @@
+# Use the official Python image
+FROM python:3.12
+
+# Set the working directory inside the container to /app
+WORKDIR /app
+
+# Copy the requirements file and install dependencies
+COPY ../requirements.txt .
+RUN pip3 install -r requirements.txt
+
+# Copy necessary Python scripts from the pipeline directory into the container
+COPY pipeline/extract_to_s3.py .
+COPY pipeline/extract_carbon.py .
+COPY pipeline/extract_many.py .
+COPY pipeline/transform.py .
+COPY pipeline/common.py .
+
+# Copy other configuration files from the root directory
+COPY ../config.py .
+COPY ../constants.py .
+
+# Expose necessary port
+EXPOSE 443
+
+# Run all extraction scripts and then transformation
+CMD ["bash", "-c", "python3 extract_carbon.py && python3 extract_to_s3.py && python3 transform.py"]

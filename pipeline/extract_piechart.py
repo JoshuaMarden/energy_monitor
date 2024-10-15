@@ -1,21 +1,20 @@
 import logging
 import os
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 import pandas as pd
 import requests
 from dotenv import load_dotenv
 
-from common import DataProcessor
+from pipeline.common import DataProcessor
 import config as cg
 from constants import Constants as ct
 
 
 # Global constants
-ENDPOINT = ct.GENERATION_ENDPOINT
-SAVE_NAME = ct.RAW_GENERATION_DATA_NAME
-SAVE_LOCATION = ct.RAW_GENERATION_DATA_PATH
+ENDPOINT = ct.PIECHART_ENDPOINT
+SAVE_NAME = ct.RAW_PIECHART_DATA_NAME
+SAVE_LOCATION = ct.RAW_CARBON_DATA_PATH
 S3_BUCKET = ct.S3_BUCKET
 
 load_dotenv('.env')
@@ -39,32 +38,18 @@ class APIClient:
                  base_url: str = ENDPOINT,
                  logger: logging.Logger = logger) -> None:
         """
-        Initialize class variables.
+        Initialise class variables.
         """
         self.base_url = base_url
         self.logger = logger
 
-    def construct_default_params(self) -> Dict[str, str]:
-        """
-        Get a time range. Currently fetches data from 12 hours ago to present.
-        """
-        twelve_hours_ago = datetime.now(timezone.utc) - timedelta(hours=12)
-        now = datetime.now(timezone.utc) - timedelta(hours=1)
-
-        return {
-            # ISO 8601 format, already UTC-aware
-            'publishDateTimeFrom': twelve_hours_ago.isoformat(),
-            'publishDateTimeTo': now.isoformat(),
-            'format': 'json'
-        }
-
     def fetch_data(self) -> Optional[Dict[str, Any]]:
         """
-        Uses the above-created time range to make an API request, returning data.
+        Makes an API request, returning data as json.
         """
+        headers = {'Accept': 'application/json'}
         try:
-            response = requests.get(
-                self.base_url, params=self.construct_default_params())
+            response = requests.get(self.base_url, headers=headers)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -96,26 +81,20 @@ class CustomDataProcessor(DataProcessor):
                          bucket,
                          logger)
 
-    def process_data(self, data: Dict[str, Any]) -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
+    def process_data(self, data: Dict[str, Any],
+                     logger: logging.Logger = logger) -> Optional[pd.DataFrame]:
         """
-        Takes data, returns it as a tuple. The first element is the data in
-        a pd.DataFrame, the second element is a dictionary containing the
-        time window over which the data was fetched.
+        Takes data, places it in DataFrame, and reformats it.
         """
+        logger = logger or logging.getLogger(__name__)
 
         if not data or "data" not in data:
             logger.warning("No data found in response.")
             return None
-
         df = pd.DataFrame(data["data"])
-
-        publish_times = pd.to_datetime(df["publishTime"])
-        time_period = {
-            "publishTimeStart": publish_times.min(),
-            "publishTimeEnd": publish_times.max()
-        }
-
-        return df, time_period
+        df["fuel_type"] = df['generationmix'].apply(lambda x: x['fuel'])
+        df["percentage"] = df['generationmix'].apply(lambda x: x['perc'])
+        return df
 
 
 class Main:
@@ -137,64 +116,57 @@ class Main:
         """
         self.api_client = api_client
         self.data_processor = data_processor
+        self.logger = logger
         self.s3_access_key = s3_access_key
         self.s3_secret_key = s3_secret_key
         self.s3_region = s3_region
         self.s3_bucket = s3_bucket
         self.s3_file_name = s3_file_name
-        self.logger = logger
 
-    def execute(self) -> Optional[Tuple[pd.DataFrame, Dict[str, datetime]]]:
+    def execute(self) -> Optional[pd.DataFrame]:
         """
         Executes the full workflow: fetches data from the API, processes it,
         saves it locally, and uploads it to an S3 bucket.
         """
-        self.logger.info("Starting the execution of the workflow.")
+        self.logger.info("Starting data fetch from API.")
+        data = self.api_client.fetch_data()
 
-        try:
-            data = self.api_client.fetch_data()
-            if data:
-                self.logger.info("Data successfully fetched from the API.")
+        if data:
+            self.logger.info("Data fetched successfully from API.")
+            self.logger.debug(f"Fetched Data: {data}")
 
-                result = self.data_processor.process_data(data)
-                if result is not None:
-                    df, time_period = result
+            self.logger.info("Processing the fetched data.")
+            df = self.data_processor.process_data(data)
 
-                    self.logger.debug("DataFrame of Demand Data:")
-                    # Log the entire DataFrame as a string
-                    self.logger.debug(df.to_string())
-                    self.logger.info("Head of the DataFrame:")
-                    self.logger.info("\n" + df.head().to_string())
-                    self.logger.info("Time Period of Data:")
-                    self.logger.info(time_period)
+            if df is not None:
+                self.logger.info("Data processed successfully into DataFrame.")
+                self.logger.debug("DataFrame of Carbon Forecast Data:")
+                self.logger.debug(df.to_string())
 
-                    # Saving data locally
-                    self.logger.info("Saving data locally.")
-                    local_save_path = self.data_processor.save_data_locally(df)
-                    self.logger.info(f"Data successfully saved locally at {
-                                     local_save_path}.")
+                self.logger.info("Saving the processed data locally.")
+                self.data_processor.save_data_locally(df)
+                self.logger.info(f"Data saved locally at `{
+                                 self.data_processor.save_location}`.")
 
-                    # Uploading data to S3
-                    self.logger.info("Preparing to upload data to S3.")
-                    s3_client = self.data_processor.get_s3_client()
+                self.logger.info("Attempting to get S3 client.")
+                s3_client = self.data_processor.get_s3_client()
 
-                    if s3_client:
-                        self.logger.info("S3 client initialized successfully.")
-                        self.data_processor.save_data_to_s3()
-                        self.logger.info(f"Data successfully uploaded to S3 at `{
-                                         self.s3_file_name}`.")
-                    else:
-                        self.logger.error("Failed to initialize S3 client.")
-
-                    return df, time_period
+                if s3_client:
+                    self.logger.info("S3 client retrieved successfully.")
+                    self.logger.info("Uploading the data to S3.")
+                    self.data_processor.save_data_to_s3()
+                    self.logger.info(f"Data successfully uploaded to S3 bucket `{
+                                     self.s3_bucket}` as `{self.s3_file_name}`.")
                 else:
-                    self.logger.error("Failed to process the data.")
+                    self.logger.error(
+                        "Failed to get S3 client. Data was not uploaded to S3.")
+                return df
             else:
-                self.logger.error("Failed to retrieve data from API.")
-        except Exception as e:
-            self.logger.error(f"An error occurred during the execution: {e}")
+                self.logger.error(
+                    "Failed to process the data into a DataFrame.")
+        else:
+            self.logger.error("Failed to retrieve data from API.")
 
-        self.logger.info("Execution of the workflow completed.")
         return None
 
 
@@ -203,8 +175,9 @@ def main() -> None:
     Runs everything
     """
 
-    # Declare Variables
+    # Setup Variables
     script_name = SCRIPT_NAME
+    save_location = SAVE_LOCATION
 
     # Setup logging and performance tracking
     performance_logger = cg.setup_subtle_logging(script_name)
@@ -213,9 +186,9 @@ def main() -> None:
 
     # Instantiate APIClient and DataProcessor using their default values
     api_client = APIClient()
-    data_processor = CustomDataProcessor()
+    data_processor = CustomDataProcessor(save_location)
 
-    # Instantiate the Main class, using default values for S3 credentials and logger
+    # Instantiate Main class with default arguments
     main_class = Main(api_client, data_processor)
 
     # Run the main execution workflow

@@ -1,0 +1,23 @@
+FROM python:3.12
+
+# Set the working directory inside the container to /app
+WORKDIR /app
+
+# Install necessary development libraries for psycopg2
+RUN apt-get update && apt-get install -y libpq-dev gcc
+
+# Copy the dashboard script from the dashboard directory to the current WORKDIR (/app) in the container
+COPY ../dashboard/dashboard_script.py .
+
+# Copy the requirements.txt from the project root (one level above 'infrastructure') to the current WORKDIR (/app) in the container
+COPY ../requirements.txt .
+
+# Install dependencies
+RUN pip3 install -r requirements.txt
+
+# Expose necessary ports
+EXPOSE 8501
+EXPOSE 5432
+
+# Run the Streamlit app
+CMD ["streamlit", "run", "dashboard_script.py", "--server.port=8501"]
